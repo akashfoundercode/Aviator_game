@@ -816,7 +816,7 @@ button:active {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background: #060914 url('./assets/nightframe.png') repeat-y center top / cover;
+    background: radial-gradient(circle at 50% 30%, #0c1228 0%, #060914 70%, #02040a 100%);
     z-index: 1;
 }
 
@@ -4437,21 +4437,28 @@ button:active {
         height: 11px;
     }
 
-    .boarding-loader-hud {
-        width: min(96%, 480px);
-        max-height: 98%;
-        padding: 5px 8px;
-        gap: 3px;
+    .boarding-loader-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(6, 9, 18, 0.95);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        background: rgba(12, 16, 28, 0.98);
-        overflow: hidden;
+        border: none !important;
+        contain: none;
     }
 
-    .boarding-loader-backdrop {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        background: rgba(6, 9, 18, 0.92);
+    .boarding-loader-hud {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 6px 10px;
+        gap: 2px;
+        overflow: hidden;
+        contain: none;
     }
 
     .flight-arena.is-countdown .world-track {
@@ -4459,32 +4466,43 @@ button:active {
     }
 
     .hud-top-row {
-        gap: 4px;
-        margin: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
     }
 
     .hud-top-left-stack {
-        gap: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 1;
+        min-width: 0;
     }
 
     .hud-gate-badge-wrap {
-        width: clamp(125px, 36vw, 165px);
+        width: clamp(105px, 28vw, 135px);
+        flex-shrink: 0;
     }
 
     .hud-gate-title {
-        font-size: 8px;
-        letter-spacing: 0.8px;
+        font-size: 7.5px;
+        letter-spacing: 0.6px;
     }
 
     .hud-passenger-pill {
-        padding: 2px 5px;
+        padding: 2px 6px;
         gap: 4px;
+        flex-shrink: 0;
     }
 
     .hud-passenger-icon-circle {
-        width: 18px;
-        height: 18px;
+        width: 17px;
+        height: 17px;
     }
 
     .hud-passenger-label {
@@ -4496,8 +4514,12 @@ button:active {
     }
 
     .hud-countdown-badge {
-        padding: 2px 6px;
+        display: flex;
+        align-items: center;
         gap: 4px;
+        padding: 2px 7px;
+        flex-shrink: 0;
+        margin-left: auto;
     }
 
     .hud-countdown-label {
@@ -4505,27 +4527,29 @@ button:active {
     }
 
     .digit-val {
-        font-size: 14px;
+        font-size: 13.5px;
     }
 
     .digit-sec {
-        font-size: 9px;
+        font-size: 8.5px;
     }
 
     .boarding-stage-wrapper {
-        height: clamp(88px, 20vh, 130px);
+        height: clamp(88px, 22cqh, 130px);
         overflow: visible;
+        contain: none;
     }
 
     .boarding-plane-box {
         height: 100%;
         width: auto;
-        max-width: 88%;
+        max-width: 90%;
         aspect-ratio: 1548 / 1016;
         transform: scale(1.02) translateZ(0);
         transform-origin: center center;
         will-change: transform;
         overflow: visible;
+        contain: none;
     }
 
     .hud-bottom-telemetry {

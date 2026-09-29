@@ -196,7 +196,6 @@ export default function World({ offset = 0 }) {
             className={`world-high-sky world-high-sky--${frame}`}
             style={{ bottom: `${(frame + 1) * 100}%` }}
           >
-            <div className="night-frame-repeat" style={{ backgroundImage: `url(${nightFrameImg})` }} />
             <SpacePartsLayer frame={frame} />
           </div>
         ))}
@@ -212,8 +211,6 @@ export default function World({ offset = 0 }) {
             <div className="moon-glow-aura" />
           </div>
         </div>
-
-        <div className="world-frame-seam" aria-hidden="true" />
       </div>
 
       {/* High-contrast subtle vignette */}
