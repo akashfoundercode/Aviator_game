@@ -2567,8 +2567,8 @@ button:active {
    BOARDING LOADER OVERLAY & JUMPING PASSENGERS
    ========================================================================== */
 .flight-arena.is-countdown .world-track {
-    filter: blur(8px) brightness(0.65);
-    transition: filter 0.4s ease;
+    filter: blur(2px) brightness(0.7);
+    transition: filter 0.3s ease;
 }
 
 .boarding-loader-backdrop {
@@ -2578,10 +2578,12 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    backdrop-filter: blur(8px);
+    background: rgba(7, 10, 19, 0.88);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
-    animation: boardingFadeIn 0.35s ease-out;
+    animation: boardingFadeIn 0.25s ease-out;
+    contain: layout paint;
 }
 
 @keyframes boardingFadeIn {
@@ -2599,17 +2601,19 @@ button:active {
     position: relative;
     width: min(95%, 640px);
     max-height: 96%;
-    background: rgba(11, 15, 25, 0.94);
+    background: rgba(12, 16, 28, 0.96);
     border: 1.5px solid rgba(255, 42, 75, 0.45);
     border-radius: clamp(12px, 2vw, 18px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 28px rgba(255, 30, 60, 0.18), inset 0 0 16px rgba(255, 30, 60, 0.08);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 30, 60, 0.18), inset 0 0 12px rgba(255, 30, 60, 0.08);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: clamp(4px, 0.8vh, 8px) clamp(10px, 1.8vw, 18px) clamp(8px, 1.8vh, 16px);
     box-sizing: border-box;
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     gap: clamp(4px, 1vh, 8px);
+    contain: layout;
 }
 
 /* ==========================================================================
@@ -2884,6 +2888,7 @@ button:active {
     overflow: visible;
     background: transparent;
     border: none;
+    contain: layout paint;
 }
 
 .boarding-plane-box {
@@ -2893,8 +2898,11 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scale(1.82);
+    transform: scale(1.82) translateZ(0);
     transform-origin: center center;
+    will-change: transform;
+    backface-visibility: hidden;
+    contain: layout paint;
 }
 
 .boarding-plane-img {
@@ -2902,7 +2910,10 @@ button:active {
     height: 100%;
     object-fit: fill;
     user-select: none;
-    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.75));
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65));
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Jumping & Escalating Passenger Line along Stairs */
@@ -2912,9 +2923,12 @@ button:active {
     pointer-events: none;
     overflow: visible;
     z-index: 5;
+    will-change: transform;
+    transform: translateZ(0);
+    contain: layout paint;
 }
 
-/* Passenger character */
+/* Passenger character - Hardware Accelerated */
 .boarding-character-wrap {
     position: absolute;
     height: 14%;
@@ -2924,6 +2938,9 @@ button:active {
     animation: passengerBoardPlane 5.6s linear infinite;
     pointer-events: none;
     z-index: 5;
+    will-change: transform, left, top, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .boarding-character-img {
@@ -2931,8 +2948,11 @@ button:active {
     height: 100%;
     object-fit: contain;
     user-select: none;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.85));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
     animation: characterStepBob 0.35s ease-in-out infinite alternate;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 @keyframes characterStepBob {
@@ -4416,12 +4436,31 @@ button:active {
 
     .boarding-stage-wrapper {
         height: clamp(170px, 40vw, 230px);
+        contain: layout paint;
     }
 
     .boarding-plane-box {
         width: clamp(250px, 84vw, 340px);
-        transform: scale(1.22);
+        transform: scale(1.22) translateZ(0);
         transform-origin: center center;
+        will-change: transform;
+        contain: layout paint;
+    }
+
+    .boarding-loader-hud {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(12, 16, 28, 0.98);
+    }
+
+    .boarding-loader-backdrop {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(6, 9, 18, 0.92);
+    }
+
+    .flight-arena.is-countdown .world-track {
+        filter: brightness(0.65);
     }
 
     .hud-telemetry-status {

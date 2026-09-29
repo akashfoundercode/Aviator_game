@@ -377,7 +377,7 @@ export function useGameEngine() {
         clearInterval(interval)
         setGameState(GAME_STATE.FLYING)
       }
-    }, 50)
+    }, 100)
 
     return () => clearInterval(interval)
   }, [gameState])
@@ -474,12 +474,17 @@ export function useGameEngine() {
     return () => clearRaf()
   }, [gameState, cashOut, syncRoundHistoryPills, syncBetHistoryFromApi, syncWalletBalance])
 
-  // CRASHED -> Display explosion for 2.4s, then immediately restart countdown and loading bar
+  // CRASHED -> Display explosion blast (min 2.2s).
+  // If socket is active, the server's s === 0 packet will trigger startCountdown at the exact millisecond betting opens.
+  // If socket is offline, fallback timer automatically transitions to countdown.
   useEffect(() => {
     if (gameState !== GAME_STATE.CRASHED) return undefined
 
     const t = setTimeout(() => {
-      startCountdown(10.0)
+      const isSocketActive = (performance.now() - lastSocketTimeRef.current) < 4000
+      if (!isSocketActive) {
+        startCountdown(10.0)
+      }
     }, 2400)
 
     return () => clearTimeout(t)
@@ -537,6 +542,12 @@ export function useGameEngine() {
 
         if (gameStateRef.current !== GAME_STATE.COUNTDOWN) {
           startCountdown(betTime)
+        } else {
+          // Re-sync with server's authoritative betTime countdown every second
+          // This ensures that at betTime: 1, exactly 1.0 second remains until flight,
+          // preventing the countdown from hitting 0.0s prematurely!
+          countdownStartTsRef.current = now
+          countdownDurationRef.current = betTime
         }
       }
 
@@ -546,6 +557,7 @@ export function useGameEngine() {
 
         if (gameStateRef.current !== GAME_STATE.FLYING) {
           clearRaf()
+          setCountdown(0)
           setGameState(GAME_STATE.FLYING)
           gameStateRef.current = GAME_STATE.FLYING
           flightStartTsRef.current = now

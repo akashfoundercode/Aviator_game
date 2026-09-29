@@ -73,104 +73,161 @@ function PremiumJetIcon({ className = 'hud-premium-jet-svg' }) {
   )
 }
 
-export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown = 10 }) {
-  const passengers = useMemo(() => [
-    { id: 'p1', delay: '0.0s' },
-    { id: 'p2', delay: '0.7s' },
-    { id: 'p3', delay: '1.4s' },
-    { id: 'p4', delay: '2.1s' },
-    { id: 'p5', delay: '2.8s' },
-    { id: 'p6', delay: '3.5s' },
-    { id: 'p7', delay: '4.2s' },
-    { id: 'p8', delay: '4.9s' },
-  ], [])
+// Static list of passengers for the boarding stairs queue
+const STATIC_PASSENGERS = [
+  { id: 'p1', delay: '0.0s' },
+  { id: 'p2', delay: '0.7s' },
+  { id: 'p3', delay: '1.4s' },
+  { id: 'p4', delay: '2.1s' },
+  { id: 'p5', delay: '2.8s' },
+  { id: 'p6', delay: '3.5s' },
+  { id: 'p7', delay: '4.2s' },
+  { id: 'p8', delay: '4.9s' },
+]
 
+// Pre-rendered 36 SVG chevrons (never recreated across ticks)
+const CHEVRON_ARROWS = Array.from({ length: 36 }, (_, i) => (
+  <svg key={i} className="chevron-arrow-svg" viewBox="0 0 10 18" fill="currentColor">
+    <path d="M1.5 1.5 L6.5 9 L1.5 16.5 L3.5 16.5 L8.5 9 L3.5 1.5 Z" />
+  </svg>
+))
+
+// 6 Progressive Milestones
+const STATIC_MILESTONES = [
+  {
+    id: 'preflight',
+    title: <>PREFLIGHT<br />CHECK</>,
+    threshold: 18,
+    activeRange: [0, 18],
+    telemetry: { red: 'PREFLIGHT CHECK', white: 'DIAGNOSTICS OK' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+      </svg>
+    ),
+  },
+  {
+    id: 'fueling',
+    title: <>FUELING</>,
+    threshold: 36,
+    activeRange: [18, 36],
+    telemetry: { red: 'REFUELING JET', white: 'FUEL PRESSURE 100%' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'boarding',
+    title: <>PASSENGERS<br />BOARDING</>,
+    threshold: 58,
+    activeRange: [36, 58],
+    telemetry: { red: 'PREPARING FLIGHT', white: 'CABIN PRESSURE OK' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'luggage',
+    title: <>LUGGAGE<br />LOADING</>,
+    threshold: 76,
+    activeRange: [58, 76],
+    telemetry: { red: 'LUGGAGE SECURED', white: 'CARGO HOLD LOCKED' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="6" width="18" height="15" rx="2" />
+        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <line x1="10" y1="11" x2="10" y2="16" />
+        <line x1="14" y1="11" x2="14" y2="16" />
+      </svg>
+    ),
+  },
+  {
+    id: 'systems',
+    title: <>SYSTEMS<br />ONLINE</>,
+    threshold: 92,
+    activeRange: [76, 92],
+    telemetry: { red: 'SYSTEMS ONLINE', white: 'AVIONICS 100% READY' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'takeoff',
+    title: <>READY FOR<br />TAKEOFF</>,
+    threshold: 100,
+    activeRange: [92, 100],
+    telemetry: { red: 'CLEARANCE GRANTED', white: 'ENGINES AT FULL POWER' },
+    icon: (
+      <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.5 19h19v2h-19z M22.07 9.64c-.39-.31-1.02-.27-1.37.11l-3.32 3.63L9.6 11.2l4.88-5.35c.34-.37.33-.94-.03-1.3-.37-.36-.95-.36-1.32.01L6.75 10.3l-3.56-.99c-.58-.16-1.19.14-1.38.71-.19.56.09 1.18.66 1.38l17.7 5.7c.18.06.36.09.54.09.43 0 .84-.18 1.12-.52.41-.51.34-1.25-.26-1.73z" />
+      </svg>
+    ),
+  },
+]
+
+/**
+ * Isolated Boarding Stage:
+ * Wrapped in React.memo with zero props so React NEVER re-renders the plane
+ * or the 8 walking characters when the countdown timer ticks!
+ * Runs 100% on GPU compositor thread at silky 60fps/120fps with zero micro-stutter.
+ */
+const BoardingPlaneStage = React.memo(function BoardingPlaneStage() {
+  return (
+    <div className="boarding-stage-wrapper">
+      <div className="tarmac-guideline-strip" />
+      <div className="tarmac-edge-beacons">
+        <span className="tarmac-beacon beacon-b1" />
+        <span className="tarmac-beacon beacon-b2" />
+        <span className="tarmac-beacon beacon-b3" />
+        <span className="tarmac-beacon beacon-b4" />
+      </div>
+
+      <div className="boarding-plane-box">
+        <img
+          src={loaderPlainImg}
+          alt="Boarding Plane"
+          className="boarding-plane-img"
+          draggable="false"
+        />
+
+        {/* Passenger Boarding Line: Characters boarding one by one */}
+        <div className="boarding-passengers-track">
+          {STATIC_PASSENGERS.map((p) => (
+            <div
+              key={p.id}
+              className="boarding-character-wrap"
+              style={{ animationDelay: `-${p.delay}` }}
+            >
+              <img
+                src={characterImg}
+                alt="Passenger"
+                className="boarding-character-img"
+                draggable="false"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+})
+
+function BoardingLoaderOverlay({ countdown = 10, totalCountdown = 10 }) {
   const progressPercent = Math.min(100, Math.max(0, ((totalCountdown - countdown) / totalCountdown) * 100))
   const boardedCount = Math.min(12, Math.max(1, Math.round((progressPercent / 100) * 12)))
 
-  // 6 Dynamic Milestones with progressive thresholds
-  const milestones = useMemo(() => [
-    {
-      id: 'preflight',
-      title: <>PREFLIGHT<br />CHECK</>,
-      threshold: 18,
-      activeRange: [0, 18],
-      telemetry: { red: 'PREFLIGHT CHECK', white: 'DIAGNOSTICS OK' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 11l3 3L22 4" />
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-        </svg>
-      ),
-    },
-    {
-      id: 'fueling',
-      title: <>FUELING</>,
-      threshold: 36,
-      activeRange: [18, 36],
-      telemetry: { red: 'REFUELING JET', white: 'FUEL PRESSURE 100%' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'boarding',
-      title: <>PASSENGERS<br />BOARDING</>,
-      threshold: 58,
-      activeRange: [36, 58],
-      telemetry: { red: 'PREPARING FLIGHT', white: 'CABIN PRESSURE OK' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'luggage',
-      title: <>LUGGAGE<br />LOADING</>,
-      threshold: 76,
-      activeRange: [58, 76],
-      telemetry: { red: 'LUGGAGE SECURED', white: 'CARGO HOLD LOCKED' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="6" width="18" height="15" rx="2" />
-          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          <line x1="10" y1="11" x2="10" y2="16" />
-          <line x1="14" y1="11" x2="14" y2="16" />
-        </svg>
-      ),
-    },
-    {
-      id: 'systems',
-      title: <>SYSTEMS<br />ONLINE</>,
-      threshold: 92,
-      activeRange: [76, 92],
-      telemetry: { red: 'SYSTEMS ONLINE', white: 'AVIONICS 100% READY' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'takeoff',
-      title: <>READY FOR<br />TAKEOFF</>,
-      threshold: 100,
-      activeRange: [92, 100],
-      telemetry: { red: 'CLEARANCE GRANTED', white: 'ENGINES AT FULL POWER' },
-      icon: (
-        <svg className="milestone-svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M2.5 19h19v2h-19z M22.07 9.64c-.39-.31-1.02-.27-1.37.11l-3.32 3.63L9.6 11.2l4.88-5.35c.34-.37.33-.94-.03-1.3-.37-.36-.95-.36-1.32.01L6.75 10.3l-3.56-.99c-.58-.16-1.19.14-1.38.71-.19.56.09 1.18.66 1.38l17.7 5.7c.18.06.36.09.54.09.43 0 .84-.18 1.12-.52.41-.51.34-1.25-.26-1.73z" />
-        </svg>
-      ),
-    },
-  ], [])
-
   // Identify current active telemetry step
-  const currentStep = milestones.find((m) => progressPercent >= m.activeRange[0] && progressPercent < m.activeRange[1]) || milestones[milestones.length - 1]
+  const currentStep = useMemo(() => {
+    return STATIC_MILESTONES.find((m) => progressPercent >= m.activeRange[0] && progressPercent < m.activeRange[1]) || STATIC_MILESTONES[STATIC_MILESTONES.length - 1]
+  }, [progressPercent])
 
   return (
     <div className="boarding-loader-backdrop" aria-hidden="true">
@@ -178,7 +235,7 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
 
         {/* TOP HUD ROW */}
         <div className="hud-top-row">
-          {/* Top Left Stack: Badge + Passenger Counter matching Reference */}
+          {/* Top Left Stack: Badge + Passenger Counter */}
           <div className="hud-top-left-stack">
             <div className="hud-gate-badge-wrap">
               <img
@@ -197,7 +254,7 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
               </div>
             </div>
 
-            {/* Passenger Pill matching Reference */}
+            {/* Passenger Pill */}
             <div className="hud-passenger-pill">
               <div className="hud-passenger-icon-circle">
                 <svg className="hud-people-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -236,50 +293,15 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
           </div>
         </div>
 
-        {/* CENTER STAGE: Hangar Tarmac + Loader Plane + Stairs + Passenger Track (Coordinates Strictly Preserved) */}
-        <div className="boarding-stage-wrapper">
-          <div className="tarmac-guideline-strip" />
-          <div className="tarmac-edge-beacons">
-            <span className="tarmac-beacon beacon-b1" />
-            <span className="tarmac-beacon beacon-b2" />
-            <span className="tarmac-beacon beacon-b3" />
-            <span className="tarmac-beacon beacon-b4" />
-          </div>
-
-          <div className="boarding-plane-box">
-            <img
-              src={loaderPlainImg}
-              alt="Boarding Plane"
-              className="boarding-plane-img"
-              draggable="false"
-            />
-
-            {/* Passenger Boarding Line: Characters boarding one by one */}
-            <div className="boarding-passengers-track">
-              {passengers.map((p) => (
-                <div
-                  key={p.id}
-                  className="boarding-character-wrap"
-                  style={{ animationDelay: `-${p.delay}` }}
-                >
-                  <img
-                    src={characterImg}
-                    alt="Passenger"
-                    className="boarding-character-img"
-                    draggable="false"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* CENTER STAGE: Plane + Passengers (Completely isolated in React.memo) */}
+        <BoardingPlaneStage />
 
         {/* BOTTOM HUD: Official Graphic Loading Bar + 6 Progressive Milestones */}
         <div className="hud-bottom-telemetry">
 
           {/* Futuristic Loading Bar using the Official Image Frame */}
           <div className="hud-loading-bar-wrapper">
-            {/* Telemetry Status directly above the Loading Bar matching Reference Image */}
+            {/* Telemetry Status directly above the Loading Bar */}
             <div className="hud-telemetry-status">
               <span className="telemetry-red">{currentStep.telemetry.red}</span>
               <span className="telemetry-dot">•</span>
@@ -294,7 +316,7 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
             />
 
             <div className="hud-loading-bar-overlay">
-              {/* Left Hexagon Plane Icon matching Reference */}
+              {/* Left Hexagon Plane Icon */}
               <div className="hud-loader-hex-icon-box">
                 <PremiumJetIcon />
               </div>
@@ -306,11 +328,7 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
                   style={{ width: `${progressPercent}%` }}
                 >
                   <div className="hud-chevron-svg-row">
-                    {Array.from({ length: 36 }).map((_, i) => (
-                      <svg key={i} className="chevron-arrow-svg" viewBox="0 0 10 18" fill="currentColor">
-                        <path d="M1.5 1.5 L6.5 9 L1.5 16.5 L3.5 16.5 L8.5 9 L3.5 1.5 Z" />
-                      </svg>
-                    ))}
+                    {CHEVRON_ARROWS}
                   </div>
                 </div>
               </div>
@@ -327,7 +345,7 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
           <div className="hud-milestone-timeline">
             <div className="milestone-track-line" />
 
-            {milestones.map((m) => {
+            {STATIC_MILESTONES.map((m) => {
               const isCompleted = progressPercent >= m.threshold
               const isActive = !isCompleted && progressPercent >= m.activeRange[0] && progressPercent < m.activeRange[1]
               const statusClass = isCompleted ? 'completed' : (isActive ? 'active' : 'pending')
@@ -356,3 +374,5 @@ export default function BoardingLoaderOverlay({ countdown = 10, totalCountdown =
     </div>
   )
 }
+
+export default React.memo(BoardingLoaderOverlay)
