@@ -4,8 +4,6 @@ import AviatorPlane from './AviatorPlane'
 import BoardingLoaderOverlay from './BoardingLoaderOverlay'
 import flyingCharacterImg from '../assets/loader/flyingchar.png'
 import characterImg from '../assets/loader/character .png'
-import planeCrashImg from '../assets/plain crash.png'
-import runwayCrashImg from '../assets/runway plain crash.png'
 import { GAME_STATE } from '../hooks/useGameEngine'
 import { RUNWAY_TAKEOFF_TIME } from '../utils/crash'
 
@@ -356,19 +354,17 @@ export default function FlightArena({
         </div>
       )}
 
-      {/* Exploding Crashed Jet Actor: Runway Crash vs Air Crash */}
+      {/* Dynamic Cinematic Explosion Blast & Shockwave (No static crash PNG) */}
       {isCrashed && (
         <div
-          className={`plane-actor-container plane-crashed-actor ${lastFlightPosRef.current.isAirborne ? 'air-crash' : 'runway-crash'}`}
+          className="plane-actor-container plane-crashed-blast"
           style={{
             left: `${planeX}px`,
             top: `${planeY}px`,
-            transform: lastFlightPosRef.current.isAirborne
-              ? `translate(-32%, -72%) rotate(${rotation}deg)`
-              : `translate(-32%, -85%) rotate(0deg)`,
           }}
         >
-          {/* Shockwave Rings */}
+          {/* Fireball Flash & Shockwave Rings */}
+          <div className="crash-explosion-flash" />
           <div className="crash-shockwave-ring ring-1" />
           <div className="crash-shockwave-ring ring-2" />
           <div className="crash-fire-core" />
@@ -384,14 +380,6 @@ export default function FlightArena({
             <span className="crash-smoke-cloud smk-1" />
             <span className="crash-smoke-cloud smk-2" />
           </div>
-
-          {/* Runway Crash on ground, In-air crash in the sky */}
-          <img
-            src={lastFlightPosRef.current.isAirborne ? planeCrashImg : runwayCrashImg}
-            alt="Plane Crashed"
-            className={`plane-crash-sprite-img ${lastFlightPosRef.current.isAirborne ? 'air-crash-img' : 'runway-crash-img'}`}
-            draggable="false"
-          />
         </div>
       )}
 
