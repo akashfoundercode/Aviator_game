@@ -37,13 +37,28 @@
     user-select: none;
 }
 
-html,
+html {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+}
+
 body,
 #root {
     width: 100%;
     height: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     overflow: hidden;
     background-color: var(--bg-dark);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -51,6 +66,8 @@ input {
     font-family: inherit;
     outline: none;
     border: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -87,9 +104,16 @@ button:active {
     flex-direction: column;
     width: 100%;
     height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
     background: var(--bg-dark);
     position: relative;
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -3371,9 +3395,9 @@ button:active {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border-active);
     border-radius: 16px;
-    width: 100%;
+    width: min(94%, 500px);
     max-width: 500px;
-    max-height: 85vh;
+    max-height: min(88vh, 88dvh);
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
 }
@@ -3508,8 +3532,66 @@ button:active {
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN (MOBILE & TABLET)
+   RESPONSIVE DESIGN (LARGE MONITORS, TABLETS, PHONES, IOS SAFARI)
    ========================================================================== */
+
+/* 1. Large Monitors & Ultrawide (1441px+) */
+@media (min-width: 1441px) {
+    .aviator-main-layout {
+        grid-template-columns: min(20vw, 330px) 1fr;
+    }
+
+    .dual-bet-controls {
+        height: clamp(86px, 6vw, 96px);
+        gap: 10px;
+    }
+
+    .bet-panel {
+        padding: 5px 12px;
+    }
+
+    .bet-panel-header {
+        margin-bottom: 4px;
+    }
+
+    .bet-tab-btn {
+        padding: 2px 12px;
+        font-size: 11px;
+    }
+
+    .amount-spinner {
+        padding: 2px;
+    }
+
+    .spinner-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+
+    .amount-input {
+        font-size: 14px;
+    }
+
+    .quick-amount-grid button {
+        padding: 3px 0;
+        font-size: 10.5px;
+    }
+
+    .btn-action-label {
+        font-size: 14px;
+    }
+
+    .btn-action-amount {
+        font-size: 15px;
+    }
+
+    .boarding-stage-wrapper {
+        height: clamp(280px, 32vw, 360px);
+    }
+}
+
+/* 2. Tablet Portrait (641px - 900px, e.g. iPad, iPad Air/Pro) */
 @media (max-width: 900px) {
     .aviator-main-layout {
         grid-template-columns: 1fr;
@@ -3521,16 +3603,20 @@ button:active {
         padding: 5px 10px;
         gap: 6px;
         border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
     }
 
     .mobile-tab-btn {
         flex: 1;
-        padding: 6px 0;
-        border-radius: 6px;
+        padding: 7px 0;
+        border-radius: 7px;
         background: var(--bg-surface);
         color: var(--text-muted);
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .mobile-tab-btn.active {
@@ -3544,7 +3630,7 @@ button:active {
 
     .sidebar-column.show-mobile {
         display: flex;
-        height: calc(100vh - 130px);
+        height: calc(100dvh - 128px);
     }
 
     .game-column {
@@ -3553,144 +3639,529 @@ button:active {
 
     .game-column.show-mobile {
         display: flex;
+        flex: 1;
+        min-height: 0;
     }
 
+    /* On tablet portrait (641px - 900px), keep panels side-by-side! */
     .dual-bet-controls {
-        grid-template-columns: 1fr;
-        height: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: 86px;
+        gap: 8px;
+        flex-shrink: 0;
     }
 
     .bet-panel {
-        height: 98px;
-    }
-
-    .bet-panel {
-        height: 98px;
+        height: 100%;
+        padding: 4px 8px;
     }
 }
 
-@media (max-width: 600px) {
+/* 3. Mobile Phones (<= 640px) */
+@media (max-width: 640px) {
+    /* Compact, non-overflowing Mobile Header */
+    .aviator-header {
+        height: 44px;
+        padding: 0 8px;
+    }
+
+    .header-left,
+    .header-right {
+        gap: 6px;
+    }
+
+    .brand-text {
+        font-size: 16px;
+    }
+
+    .brand-logo-icon {
+        font-size: 17px;
+    }
+
+    .header-btn {
+        padding: 4px 6px;
+    }
+
+    .header-btn-ghost .btn-label {
+        display: none;
+    }
+
+    .header-btn-ghost {
+        padding: 5px;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        justify-content: center;
+    }
+
+    .header-btn-fair .fair-text {
+        display: none;
+    }
+
+    .header-btn-fair {
+        padding: 5px;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        justify-content: center;
+    }
+
+    .balance-container {
+        padding: 2px 6px 2px 8px;
+        gap: 4px;
+    }
+
+    .balance-label {
+        font-size: 9px;
+    }
+
+    .balance-amount {
+        font-size: 12px;
+    }
+
+    .deposit-plus-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+    }
+
+    .sound-toggle-btn {
+        width: 26px;
+        height: 26px;
+    }
+
+    .header-profile-btn {
+        padding: 2px 7px 2px 2px;
+        gap: 5px;
+    }
+
+    .header-pilot-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    .header-pilot-name {
+        font-size: 11px;
+    }
+
+    /* History Bar */
+    .aviator-history-bar {
+        height: 28px;
+        padding: 0 8px;
+        gap: 4px;
+    }
+
+    .history-pill {
+        padding: 1.5px 6px;
+        font-size: 10px;
+    }
+
+    /* Mobile switcher tabs */
+    .mobile-view-tabs {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    .mobile-tab-btn {
+        padding: 5px 0;
+        font-size: 11px;
+    }
+
+    /* Game column padding */
+    .game-column {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    /* Stack dual bet controls vertically for phones */
+    .dual-bet-controls {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 6px;
+    }
+
+    .bet-panel {
+        height: 82px;
+        padding: 4px 6px;
+    }
+
+    .bet-panel-header {
+        margin-bottom: 2px;
+    }
+
+    .bet-tab-btn {
+        padding: 1px 8px;
+        font-size: 9.5px;
+    }
+
+    .bet-panel-body {
+        gap: 5px;
+        height: calc(100% - 18px);
+    }
+
+    .amount-spinner {
+        padding: 1px;
+        border-radius: 5px;
+    }
+
+    .spinner-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 13px;
+    }
+
+    .currency-tag {
+        font-size: 10px;
+    }
+
+    .amount-input {
+        font-size: 12px;
+    }
+
+    .quick-amount-grid {
+        gap: 2px;
+    }
+
+    .quick-amount-grid button {
+        padding: 2px 0;
+        font-size: 9px;
+    }
+
+    .btn-aviator-action {
+        border-radius: 7px;
+        min-height: 48px;
+    }
+
+    .btn-action-label {
+        font-size: 12px;
+    }
+
+    .btn-action-amount {
+        font-size: 12px;
+    }
+
+    /* Boarding Loader on Mobile */
     .boarding-loader-hud {
         width: 95%;
-        padding: 8px 10px;
+        padding: 8px 8px;
         gap: 5px;
         border-radius: 12px;
     }
 
     .hud-gate-badge-wrap {
-        width: clamp(140px, 38vw, 190px);
+        width: clamp(135px, 36vw, 175px);
         margin: 0;
     }
 
     .hud-passenger-pill {
-        padding: 3px 8px;
-        gap: 5px;
+        padding: 3px 6px;
+        gap: 4px;
     }
 
     .hud-passenger-icon-circle {
-        width: 22px;
-        height: 22px;
-    }
-
-    .hud-passenger-label {
-        font-size: 7.5px;
-    }
-
-    .hud-passenger-count {
-        font-size: 11px;
-    }
-
-    .count-num {
-        font-size: 14px;
-    }
-
-    .hud-countdown-badge {
-        padding: 4px 8px;
-        gap: 6px;
-    }
-
-    .hud-rocket-box {
         width: 20px;
         height: 20px;
     }
 
-    .hud-rocket-icon {
+    .hud-passenger-label {
+        font-size: 7px;
+    }
+
+    .hud-passenger-count {
+        font-size: 10.5px;
+    }
+
+    .count-num {
+        font-size: 13px;
+    }
+
+    .hud-countdown-badge {
+        padding: 4px 6px;
+        gap: 5px;
+    }
+
+    .hud-rocket-box {
         width: 18px;
         height: 18px;
     }
 
+    .hud-rocket-icon {
+        width: 16px;
+        height: 16px;
+    }
+
     .hud-countdown-label {
-        font-size: 7.5px;
+        font-size: 7px;
     }
 
     .digit-val {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .digit-sec {
-        font-size: 11px;
+        font-size: 10.5px;
     }
 
     .hud-clock-circle {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     .hud-clock-icon {
-        width: 13px;
-        height: 13px;
-    }
-
-    .boarding-stage-wrapper {
-        height: clamp(220px, 48vw, 290px);
-    }
-
-    .boarding-plane-box {
-        width: clamp(280px, 90vw, 390px);
-        transform: scale(1.32);
-        transform-origin: center center;
-    }
-
-    .hud-telemetry-status {
-        font-size: 8.5px;
-        gap: 5px;
-    }
-
-    .hud-loading-bar-wrapper {
-        max-width: clamp(220px, 85%, 310px);
-    }
-
-    .hud-image-percent-text {
-        font-size: 11px;
-    }
-
-    .hud-milestone-timeline {
-        padding: 0 2px;
-    }
-
-    .milestone-badge-circle {
-        width: 19px;
-        height: 19px;
-    }
-
-    .hud-milestone-item.active .milestone-badge-circle.active-glow {
-        width: 23px;
-        height: 23px;
-    }
-
-    .milestone-svg {
-        width: 9px;
-        height: 9px;
-    }
-
-    .hud-milestone-item.active .milestone-svg {
         width: 12px;
         height: 12px;
     }
 
+    .boarding-stage-wrapper {
+        height: clamp(180px, 42vw, 240px);
+    }
+
+    .boarding-plane-box {
+        width: clamp(260px, 86vw, 360px);
+        transform: scale(1.28);
+        transform-origin: center center;
+    }
+
+    .hud-telemetry-status {
+        font-size: 8px;
+        gap: 4px;
+    }
+
+    .hud-loading-bar-wrapper {
+        max-width: clamp(210px, 85%, 290px);
+    }
+
+    .hud-image-percent-text {
+        font-size: 10.5px;
+    }
+
+    .hud-milestone-timeline {
+        padding: 0;
+    }
+
+    .milestone-badge-circle {
+        width: 18px;
+        height: 18px;
+    }
+
+    .hud-milestone-item.active .milestone-badge-circle.active-glow {
+        width: 21px;
+        height: 21px;
+    }
+
+    .milestone-svg {
+        width: 8px;
+        height: 8px;
+    }
+
+    .hud-milestone-item.active .milestone-svg {
+        width: 11px;
+        height: 11px;
+    }
+
     .milestone-label {
-        font-size: 6.5px;
-        letter-spacing: 0.2px;
+        font-size: 6px;
+        letter-spacing: 0.1px;
+    }
+}
+
+/* 4. Extra-Compact Phones (<= 480px, iPhone SE, Galaxy A, etc.) */
+@media (max-width: 480px) {
+    .online-badge {
+        display: none;
+    }
+
+    .header-pilot-name {
+        display: none;
+    }
+
+    .header-profile-btn {
+        padding: 2px;
+        border-radius: 50%;
+    }
+
+    .profile-modal-card {
+        width: 95%;
+        max-height: 90dvh;
+    }
+
+    .modal-container {
+        width: 95%;
+        max-height: 90dvh;
+    }
+
+    .deposit-dropdown {
+        right: -8px;
+        max-width: 88vw;
+    }
+}
+
+@media (max-width: 400px) {
+    .balance-label {
+        display: none;
+    }
+
+    .brand-text {
+        font-size: 15px;
+    }
+
+    .aviator-header {
+        padding: 0 6px;
+    }
+
+    .history-label {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .bet-panel {
+        height: 76px;
+        padding: 3px 5px;
+    }
+
+    .spinner-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .amount-input {
+        font-size: 11px;
+    }
+
+    .quick-amount-grid button {
+        font-size: 8px;
+    }
+
+    .btn-action-label {
+        font-size: 11px;
+    }
+
+    .btn-action-amount {
+        font-size: 11px;
+    }
+
+    .boarding-stage-wrapper {
+        height: clamp(150px, 40vw, 190px);
+    }
+
+    .boarding-plane-box {
+        width: clamp(230px, 84vw, 290px);
+        transform: scale(1.16);
+    }
+}
+
+/* 5. Mobile Landscape (max-height: 520px and orientation: landscape) */
+@media (max-height: 520px) and (orientation: landscape) {
+    .aviator-header {
+        height: 36px;
+        padding: 0 8px;
+    }
+
+    .brand-text {
+        font-size: 15px;
+    }
+
+    .online-badge {
+        display: none;
+    }
+
+    .aviator-history-bar {
+        height: 24px;
+        padding: 0 8px;
+    }
+
+    .history-pill {
+        padding: 1px 5px;
+        font-size: 9.5px;
+    }
+
+    .mobile-view-tabs {
+        padding: 2px 6px;
+    }
+
+    .mobile-tab-btn {
+        padding: 3px 0;
+        font-size: 10px;
+    }
+
+    .game-column {
+        padding: 3px;
+        gap: 3px;
+    }
+
+    .stage-wrapper {
+        min-height: 120px;
+    }
+
+    /* In landscape, place bet panels side-by-side in slim height! */
+    .dual-bet-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: 68px;
+        gap: 4px;
+    }
+
+    .bet-panel {
+        height: 68px;
+        padding: 2px 6px;
+    }
+
+    .bet-panel-header {
+        margin-bottom: 1px;
+    }
+
+    .bet-tab-btn {
+        padding: 0 6px;
+        font-size: 8.5px;
+    }
+
+    .bet-panel-body {
+        height: calc(100% - 15px);
+        gap: 4px;
+    }
+
+    .amount-spinner {
+        padding: 0;
+    }
+
+    .spinner-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
+    }
+
+    .quick-amount-grid button {
+        padding: 1px 0;
+        font-size: 8.5px;
+    }
+
+    .btn-aviator-action {
+        min-height: 36px;
+    }
+
+    .btn-action-label {
+        font-size: 10.5px;
+    }
+
+    .btn-action-amount {
+        font-size: 11px;
+    }
+
+    .boarding-stage-wrapper {
+        height: clamp(120px, 35vh, 180px);
+    }
+
+    .boarding-plane-box {
+        transform: scale(0.95);
+    }
+
+    .boarding-loader-hud {
+        padding: 4px 6px;
+        gap: 3px;
     }
 }
 
@@ -3745,7 +4216,10 @@ button:active {
 
 /* Profile Modal Details */
 .profile-modal-card {
+    width: min(94%, 440px);
     max-width: 440px;
+    max-height: min(88vh, 88dvh);
+    overflow-y: auto;
     background: #14171e;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 18px;
