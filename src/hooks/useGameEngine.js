@@ -578,8 +578,6 @@ export function useGameEngine() {
           rafRef.current = requestAnimationFrame(animTick)
         }
 
-        const elapsed = (now - flightStartTsRef.current) / 1000
-        setFlightElapsed(elapsed)
         setMultiplier(liveM)
         crashPointRef.current = { value: liveM, liveMultiplier: liveM }
         soundManager.updateEnginePitch(liveM)

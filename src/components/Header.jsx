@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { soundManager } from '../utils/audio'
 
-export default function Header({
+function Header({
   balance,
   onResetBalance,
   soundMuted,
@@ -170,3 +170,5 @@ export default function Header({
     </header>
   )
 }
+
+export default React.memo(Header)

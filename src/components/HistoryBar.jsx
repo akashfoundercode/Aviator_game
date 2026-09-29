@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { getMultiplierColor, generateProvablyFairHash } from '../utils/crash'
 import { soundManager } from '../utils/audio'
 
-export default function HistoryBar({ history = [], onSelectRound }) {
+function HistoryBar({ history = [], onSelectRound }) {
   const [selectedPill, setSelectedPill] = useState(null)
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -96,4 +96,6 @@ export default function HistoryBar({ history = [], onSelectRound }) {
     </div>
   )
 }
+
+export default React.memo(HistoryBar)
 

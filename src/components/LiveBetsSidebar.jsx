@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { soundManager } from '../utils/audio'
 import { getMultiplierColor } from '../utils/crash'
 
-export default function LiveBetsSidebar({
+function LiveBetsSidebar({
   liveBots = [],
   myBetsHistory = [],
   userActiveBets = [],
@@ -10,16 +10,24 @@ export default function LiveBetsSidebar({
 }) {
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'my' | 'top'
 
-  // Calculate stats for current round
-  const totalBets = liveBots.length + userActiveBets.length
-  const totalAmount = liveBots.reduce((sum, b) => sum + b.amount, 0) +
-    userActiveBets.reduce((sum, b) => sum + (b.status !== 'IDLE' ? b.amount : 0), 0)
+  // Calculate stats for current round - memoized to prevent recomputing on every frame
+  const totalBets = useMemo(
+    () => liveBots.length + userActiveBets.length,
+    [liveBots.length, userActiveBets.length]
+  )
 
-  // Filter top wins for top tab
-  const topWins = [...myBetsHistory, ...liveBots]
-    .filter((b) => (b.payout || 0) > 0)
-    .sort((a, b) => (b.payout || 0) - (a.payout || 0))
-    .slice(0, 25)
+  const totalAmount = useMemo(() => {
+    return liveBots.reduce((sum, b) => sum + b.amount, 0) +
+      userActiveBets.reduce((sum, b) => sum + (b.status !== 'IDLE' ? b.amount : 0), 0)
+  }, [liveBots, userActiveBets])
+
+  // Filter top wins for top tab - memoized to prevent re-sorting on every frame
+  const topWins = useMemo(() => {
+    return [...myBetsHistory, ...liveBots]
+      .filter((b) => (b.payout || 0) > 0)
+      .sort((a, b) => (b.payout || 0) - (a.payout || 0))
+      .slice(0, 25)
+  }, [myBetsHistory, liveBots])
 
   return (
     <aside className="aviator-sidebar">
@@ -278,4 +286,6 @@ export default function LiveBetsSidebar({
     </aside>
   )
 }
+
+export default React.memo(LiveBetsSidebar)
 

@@ -132,47 +132,14 @@ const SpacePartsLayer = React.memo(function SpacePartsLayer({ frame = 0 }) {
   return null
 })
 
-/**
- * Memoized High-Altitude Sky Frame Component
- */
-const HighSkyFrame = React.memo(function HighSkyFrame({ frame, stars }) {
-  return (
-    <div
-      className={`world-high-sky world-high-sky--${frame}`}
-      style={{ bottom: `${(frame + 1) * 100}%` }}
-    >
-      <div className="night-frame-repeat" style={{ backgroundImage: `url(${nightFrameImg})` }} />
-      <SpacePartsLayer frame={frame} />
-      <MeteorLayer />
-      <div className="sky-stars-layer">
-        {stars.map((s) => (
-          <span
-            key={`s-${frame}-${s.id}`}
-            className="sky-star"
-            style={{
-              left: s.left,
-              top: s.top,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              opacity: s.opacity,
-              animationDuration: s.twinkleDuration,
-              animationDelay: s.twinkleDelay,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  )
-})
-
-// 50 High-altitude frames ensure seamless infinite scrolling past 100x, 1000x+ without ending
-const INFINITE_ALTITUDE_FRAMES = Array.from({ length: 50 }, (_, i) => i)
+// Active altitude milestone frames (where celestial bodies actually exist)
+const CELESTIAL_MILESTONE_FRAMES = [0, 2, 4, 7, 10, 14, 19]
 
 /**
  * Procedural Starry Sky with Seamless Night Looping & Celestial Journey (Zero-Jitter, GPU Optimized)
  */
 export default function World({ offset = 0 }) {
-  // Pre-generate static starfield array once
+  // Static starfield array (created once)
   const stars = useMemo(() => {
     const list = []
     for (let i = 0; i < 35; i++) {
@@ -191,18 +158,47 @@ export default function World({ offset = 0 }) {
 
   return (
     <div className="world-viewport">
+      {/* Global Starfield Layer: Sparkles continuously across entire flight without duplicating 1700+ nodes */}
+      <div className="sky-stars-layer" aria-hidden="true">
+        {stars.map((s) => (
+          <span
+            key={`global-star-${s.id}`}
+            className="sky-star"
+            style={{
+              left: s.left,
+              top: s.top,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              opacity: s.opacity,
+              animationDuration: s.twinkleDuration,
+              animationDelay: s.twinkleDelay,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Global Meteors Layer: Streaks across the night sky */}
+      <MeteorLayer />
+
       <div
         className="world-track"
         style={{
           transform: `translate3d(0, ${offset}px, 0)`,
         }}
       >
-        {/* Infinite deep space atmosphere above all frames */}
+        {/* Infinite deep space atmosphere above runway */}
         <div className="world-deepspace" />
 
-        {/* High-altitude looping night frames with arranged celestial milestones */}
-        {INFINITE_ALTITUDE_FRAMES.map((frame) => (
-          <HighSkyFrame key={`high-frame-${frame}`} frame={frame} stars={stars} />
+        {/* Distinct Celestial Milestones (Stage 1 to Stage 7: Jupiter, Saturn, Earth Orbital, etc.) */}
+        {CELESTIAL_MILESTONE_FRAMES.map((frame) => (
+          <div
+            key={`high-frame-${frame}`}
+            className={`world-high-sky world-high-sky--${frame}`}
+            style={{ bottom: `${(frame + 1) * 100}%` }}
+          >
+            <div className="night-frame-repeat" style={{ backgroundImage: `url(${nightFrameImg})` }} />
+            <SpacePartsLayer frame={frame} />
+          </div>
         ))}
 
         {/* Frame 1: Full Runway Frame with Single Fixed Moon */}

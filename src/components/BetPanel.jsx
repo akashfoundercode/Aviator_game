@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { BET_STATUS, GAME_STATE } from '../hooks/useGameEngine'
 import { soundManager } from '../utils/audio'
 
-export default function BetPanel({
+function BetPanel({
   panelIndex,
   bet,
   gameState,
@@ -225,4 +225,6 @@ export default function BetPanel({
     </div>
   )
 }
+
+export default React.memo(BetPanel)
 

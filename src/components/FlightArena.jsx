@@ -335,13 +335,12 @@ export default function FlightArena({
         multiplier={multiplier}
       />
 
-      {/* Jet Actor Container (Active during Flight) */}
+      {/* Jet Actor Container (Active during Flight) - 100% GPU Hardware Accelerated */}
       {isFlying && (
         <div
           className="plane-actor-container"
           style={{
-            left: `${planeX}px`,
-            top: `${planeY}px`,
+            transform: `translate3d(${planeX}px, ${planeY}px, 0) translate(-28%, -82.5%)`,
           }}
         >
           <AviatorPlane
@@ -359,8 +358,7 @@ export default function FlightArena({
         <div
           className="plane-actor-container plane-crashed-blast"
           style={{
-            left: `${planeX}px`,
-            top: `${planeY}px`,
+            transform: `translate3d(${planeX}px, ${planeY}px, 0) translate(-50%, -50%)`,
           }}
         >
           {/* Fireball Flash & Shockwave Rings */}

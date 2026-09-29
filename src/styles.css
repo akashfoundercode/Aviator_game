@@ -1403,14 +1403,16 @@ button:active {
    ========================================================================== */
 .plane-actor-container {
     position: absolute;
+    left: 0;
+    top: 0;
     z-index: 12;
-    transform: translate(-28%, -82.5%);
     pointer-events: none;
-    will-change: left, top;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 .plane-flew-away {
-    transition: left 0.42s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+    transition: transform 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
 }
 
 .flight-parachute-eject {
@@ -1635,11 +1637,14 @@ button:active {
    ========================================================================== */
 .plane-crashed-blast {
     position: absolute;
+    left: 0;
+    top: 0;
     z-index: 14;
     width: 2px;
     height: 2px;
-    transform: translate(-50%, -50%);
     pointer-events: none;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 /* Blinding Initial Fireball Flash */
@@ -2888,7 +2893,6 @@ button:active {
     overflow: visible;
     background: transparent;
     border: none;
-    contain: layout paint;
 }
 
 .boarding-plane-box {
@@ -2902,7 +2906,7 @@ button:active {
     transform-origin: center center;
     will-change: transform;
     backface-visibility: hidden;
-    contain: layout paint;
+    overflow: visible;
 }
 
 .boarding-plane-img {
@@ -2925,7 +2929,6 @@ button:active {
     z-index: 5;
     will-change: transform;
     transform: translateZ(0);
-    contain: layout paint;
 }
 
 /* Passenger character - Hardware Accelerated */
@@ -4434,23 +4437,15 @@ button:active {
         height: 11px;
     }
 
-    .boarding-stage-wrapper {
-        height: clamp(170px, 40vw, 230px);
-        contain: layout paint;
-    }
-
-    .boarding-plane-box {
-        width: clamp(250px, 84vw, 340px);
-        transform: scale(1.22) translateZ(0);
-        transform-origin: center center;
-        will-change: transform;
-        contain: layout paint;
-    }
-
     .boarding-loader-hud {
+        width: min(96%, 480px);
+        max-height: 98%;
+        padding: 5px 8px;
+        gap: 3px;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         background: rgba(12, 16, 28, 0.98);
+        overflow: hidden;
     }
 
     .boarding-loader-backdrop {
@@ -4463,46 +4458,123 @@ button:active {
         filter: brightness(0.65);
     }
 
-    .hud-telemetry-status {
+    .hud-top-row {
+        gap: 4px;
+        margin: 0;
+        align-items: center;
+    }
+
+    .hud-top-left-stack {
+        gap: 3px;
+    }
+
+    .hud-gate-badge-wrap {
+        width: clamp(125px, 36vw, 165px);
+    }
+
+    .hud-gate-title {
         font-size: 8px;
+        letter-spacing: 0.8px;
+    }
+
+    .hud-passenger-pill {
+        padding: 2px 5px;
         gap: 4px;
     }
 
-    .hud-loading-bar-wrapper {
-        max-width: clamp(210px, 85%, 290px);
-    }
-
-    .hud-image-percent-text {
-        font-size: 10.5px;
-    }
-
-    .hud-milestone-timeline {
-        padding: 0;
-    }
-
-    .milestone-badge-circle {
+    .hud-passenger-icon-circle {
         width: 18px;
         height: 18px;
     }
 
+    .hud-passenger-label {
+        font-size: 6.5px;
+    }
+
+    .hud-passenger-count {
+        font-size: 11px;
+    }
+
+    .hud-countdown-badge {
+        padding: 2px 6px;
+        gap: 4px;
+    }
+
+    .hud-countdown-label {
+        font-size: 6px;
+    }
+
+    .digit-val {
+        font-size: 14px;
+    }
+
+    .digit-sec {
+        font-size: 9px;
+    }
+
+    .boarding-stage-wrapper {
+        height: clamp(88px, 20vh, 130px);
+        overflow: visible;
+    }
+
+    .boarding-plane-box {
+        height: 100%;
+        width: auto;
+        max-width: 88%;
+        aspect-ratio: 1548 / 1016;
+        transform: scale(1.02) translateZ(0);
+        transform-origin: center center;
+        will-change: transform;
+        overflow: visible;
+    }
+
+    .hud-bottom-telemetry {
+        gap: 3px;
+        padding-bottom: 2px;
+    }
+
+    .hud-telemetry-status {
+        font-size: 7.5px;
+        gap: 3px;
+    }
+
+    .hud-loading-bar-wrapper {
+        max-width: clamp(180px, 82%, 260px);
+    }
+
+    .hud-image-percent-text {
+        font-size: 10px;
+    }
+
+    .hud-milestone-timeline {
+        padding: 0 2px;
+        gap: 1px;
+    }
+
+    .milestone-badge-circle {
+        width: 16px;
+        height: 16px;
+    }
+
     .hud-milestone-item.active .milestone-badge-circle.active-glow {
-        width: 21px;
-        height: 21px;
+        width: 19px;
+        height: 19px;
     }
 
     .milestone-svg {
-        width: 8px;
-        height: 8px;
+        width: 7.5px;
+        height: 7.5px;
     }
 
     .hud-milestone-item.active .milestone-svg {
-        width: 11px;
-        height: 11px;
+        width: 9.5px;
+        height: 9.5px;
     }
 
     .milestone-label {
-        font-size: 6px;
-        letter-spacing: 0.1px;
+        font-size: 5.5px;
+        letter-spacing: 0px;
+        line-height: 1.1;
     }
 }
 
@@ -4584,12 +4656,16 @@ button:active {
     }
 
     .boarding-stage-wrapper {
-        height: clamp(150px, 40vw, 190px);
+        height: clamp(80px, 18vh, 110px);
+        overflow: visible;
     }
 
     .boarding-plane-box {
-        width: clamp(230px, 84vw, 290px);
-        transform: scale(1.16);
+        height: 100%;
+        width: auto;
+        max-width: 86%;
+        transform: scale(0.96) translateZ(0);
+        overflow: visible;
     }
 }
 
