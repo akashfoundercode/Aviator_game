@@ -6,6 +6,7 @@ import BetPanel from './components/BetPanel.jsx'
 import LiveBetsSidebar from './components/LiveBetsSidebar.jsx'
 import ProvablyFairModal from './components/ProvablyFairModal.jsx'
 import ProfileModal from './components/ProfileModal.jsx'
+import RotateDeviceOverlay from './components/RotateDeviceOverlay.jsx'
 import { useGameEngine } from './hooks/useGameEngine.js'
 
 export default function App() {
@@ -134,6 +135,9 @@ export default function App() {
                     onClose={() => setIsProfileOpen(false)}
                 />
             )}
+
+            {/* Mobile Portrait Orientation Prompt (Strict Landscape Requirement) */}
+            <RotateDeviceOverlay />
         </div>
     )
 }
