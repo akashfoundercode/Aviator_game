@@ -135,6 +135,9 @@ const SpacePartsLayer = React.memo(function SpacePartsLayer({ frame = 0 }) {
 // Active altitude milestone frames (where celestial bodies actually exist)
 const CELESTIAL_MILESTONE_FRAMES = [0, 2, 4, 7, 10, 14, 19]
 
+// 40 Continuous night sky frames ensure seamless looping from takeoff to deep space past 100x+
+const INFINITE_NIGHT_SKY_FRAMES = Array.from({ length: 40 }, (_, i) => i)
+
 /**
  * Procedural Starry Sky with Seamless Night Looping & Celestial Journey (Zero-Jitter, GPU Optimized)
  */
@@ -188,6 +191,24 @@ export default function World({ offset = 0 }) {
       >
         {/* Infinite deep space atmosphere above runway */}
         <div className="world-deepspace" />
+
+        {/* Continuous Seamless Looping Night Sky (nightframe.png) - Subpixel overlap & alternating flip */}
+        {INFINITE_NIGHT_SKY_FRAMES.map((fIndex) => (
+          <div
+            key={`night-sky-loop-${fIndex}`}
+            className="world-night-sky-frame"
+            style={{
+              bottom: `calc(${(fIndex + 1) * 100}% - 1px)`,
+              height: 'calc(100% + 2px)',
+              transform: fIndex % 2 === 1 ? 'scaleX(-1)' : 'none',
+            }}
+          >
+            <div
+              className="night-sky-loop-art"
+              style={{ backgroundImage: `url(${nightFrameImg})` }}
+            />
+          </div>
+        ))}
 
         {/* Distinct Celestial Milestones (Stage 1 to Stage 7: Jupiter, Saturn, Earth Orbital, etc.) */}
         {CELESTIAL_MILESTONE_FRAMES.map((frame) => (
