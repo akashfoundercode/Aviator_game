@@ -1,80 +1,113 @@
 /**
- * Real-time WebSocket Client for Aviator Engine
- * Handles live synchronization for countdowns, multiplier ticks, crash points,
- * live player bets, and wallet updates.
+ * Real-time Socket.IO Client for Aviator Engine
+ * Connected directly to: https://fctechteamnode.shop/
+ * Listening on channel: demobdg_aviator
+ * 
+ * Packet structure:
+ * {
+ *   betTime: number,    // Countdown seconds (e.g. 10 to 1 in status 0, 1 in status 1 & 2)
+ *   status: 0 | 1 | 2,  // 0: Countdown/Betting, 1: Flying/Multiplier, 2: Crashed/Flew Away
+ *   period: number,     // Current Round ID / Serial number (e.g. 1085286)
+ *   timer: string       // Live Multiplier in status 1 (e.g. "1.25"), Crash Point in status 2 (e.g. "3.46")
+ * }
  */
 
-import { API_CONFIG, isWebSocketConfigured, tokenStorage } from './config'
+import { io } from 'socket.io-client'
+import { API_CONFIG, isWebSocketConfigured } from './config'
 
 class WebSocketService {
   constructor() {
-    this.ws = null
+    this.socket = null
     this.listeners = new Map()
-    this.reconnectAttempts = 0
-    this.maxReconnectAttempts = 10
-    this.reconnectTimer = null
-    this.pingInterval = null
     this.isConnected = false
-    this.isExplicitlyClosed = false
+    this.lastPacket = null
+    this.channel = API_CONFIG.SOCKET_CHANNEL || 'demobdg_aviator'
   }
 
   /**
-   * Connect to WebSocket server
+   * Connect to Socket.IO server
    */
-  connect(url = API_CONFIG.WS_URL) {
+  connect(url = API_CONFIG.WS_URL, channel = API_CONFIG.SOCKET_CHANNEL) {
     if (!isWebSocketConfigured() && !url) {
-      // WebSocket server not configured - silence & allow local simulation
       return
     }
 
-    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+    if (this.socket && this.socket.connected) {
       return
     }
 
-    this.isExplicitlyClosed = false
-    const token = tokenStorage.get()
-    const targetUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url
+    this.channel = channel || 'demobdg_aviator'
+    const targetUrl = url || 'https://fctechteamnode.shop/'
 
     try {
-      this.ws = new WebSocket(targetUrl)
+      this.socket = io(targetUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 20,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 10000,
+      })
 
-      this.ws.onopen = () => {
+      this.socket.on('connect', () => {
         this.isConnected = true
-        this.reconnectAttempts = 0
-        console.log('[WebSocket] Connected successfully to', targetUrl)
-        this.emitLocal('connection_status', { connected: true })
-        this.startHeartbeat()
-      }
+        console.log(`[SocketService] Connected to ${targetUrl} (ID: ${this.socket.id})`)
+        this.emitLocal('connection_status', { connected: true, socketId: this.socket.id })
+      })
 
-      this.ws.onmessage = (event) => {
+      this.socket.on('connect_error', (err) => {
+        this.isConnected = false
+        console.warn('[SocketService] Connection error:', err.message)
+        this.emitLocal('connection_status', { connected: false, error: err.message })
+      })
+
+      this.socket.on('disconnect', (reason) => {
+        this.isConnected = false
+        console.log('[SocketService] Disconnected:', reason)
+        this.emitLocal('connection_status', { connected: false, reason })
+      })
+
+      // Main listener for the live game channel (demobdg_aviator)
+      this.socket.on(this.channel, (raw) => {
         try {
-          const message = JSON.parse(event.data)
-          const { type, data } = message
-          if (type) {
-            this.emitLocal(type, data)
+          const data = typeof raw === 'string' ? JSON.parse(raw) : raw
+          this.lastPacket = data
+
+          // Emit raw event
+          this.emitLocal(this.channel, data)
+
+          // Emit normalized events based on server status:
+          // status 0: Countdown / Betting phase
+          // status 1: Flight / Live multiplier phase
+          // status 2: Crash / Flew away phase
+          if (data.status === 0) {
+            this.emitLocal(API_CONFIG.WS_EVENTS.ROUND_COUNTDOWN, {
+              countdown: data.betTime,
+              roundId: data.period,
+              status: 0,
+              raw: data,
+            })
+          } else if (data.status === 1) {
+            this.emitLocal(API_CONFIG.WS_EVENTS.MULTIPLIER_TICK, {
+              multiplier: parseFloat(data.timer) || 1.0,
+              roundId: data.period,
+              status: 1,
+              raw: data,
+            })
+          } else if (data.status === 2) {
+            this.emitLocal(API_CONFIG.WS_EVENTS.ROUND_CRASHED, {
+              crashPoint: parseFloat(data.timer) || 1.0,
+              roundId: data.period,
+              status: 2,
+              raw: data,
+            })
           }
         } catch (err) {
-          console.warn('[WebSocket] Received non-JSON packet:', event.data)
+          console.warn('[SocketService] Failed to parse packet:', raw, err)
         }
-      }
-
-      this.ws.onclose = (event) => {
-        this.isConnected = false
-        this.stopHeartbeat()
-        this.emitLocal('connection_status', { connected: false })
-
-        if (!this.isExplicitlyClosed) {
-          this.scheduleReconnect(url)
-        }
-      }
-
-      this.ws.onerror = (err) => {
-        console.warn('[WebSocket] Error encountered:', err)
-        this.emitLocal('error', err)
-      }
+      })
     } catch (err) {
-      console.warn('[WebSocket] Connection initialization failed:', err)
-      this.scheduleReconnect(url)
+      console.warn('[SocketService] Initialization error:', err)
     }
   }
 
@@ -82,28 +115,22 @@ class WebSocketService {
    * Disconnect cleanly
    */
   disconnect() {
-    this.isExplicitlyClosed = true
-    this.stopHeartbeat()
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer)
-      this.reconnectTimer = null
-    }
-    if (this.ws) {
+    if (this.socket) {
       try {
-        this.ws.close()
+        this.socket.disconnect()
       } catch {}
-      this.ws = null
+      this.socket = null
     }
     this.isConnected = false
     this.emitLocal('connection_status', { connected: false })
   }
 
   /**
-   * Send JSON message to server
+   * Emit event to server
    */
-  send(type, data = {}) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type, data }))
+  emit(event, data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit(event, data)
       return true
     }
     return false
@@ -138,46 +165,14 @@ class WebSocketService {
         try {
           cb(data)
         } catch (err) {
-          console.error(`[WebSocket] Error in subscriber for event "${event}":`, err)
+          console.error(`[SocketService] Error in subscriber for "${event}":`, err)
         }
       })
     }
   }
 
-  /**
-   * Keep connection alive via ping
-   */
-  startHeartbeat() {
-    this.stopHeartbeat()
-    this.pingInterval = setInterval(() => {
-      this.send('ping', { timestamp: Date.now() })
-    }, 25000)
-  }
-
-  stopHeartbeat() {
-    if (this.pingInterval) {
-      clearInterval(this.pingInterval)
-      this.pingInterval = null
-    }
-  }
-
-  /**
-   * Exponential backoff reconnection
-   */
-  scheduleReconnect(url) {
-    if (this.isExplicitlyClosed) return
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.warn('[WebSocket] Maximum reconnect attempts reached.')
-      return
-    }
-
-    const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts), 15000)
-    this.reconnectAttempts++
-    console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})...`)
-
-    this.reconnectTimer = setTimeout(() => {
-      this.connect(url)
-    }, delay)
+  getLastPacket() {
+    return this.lastPacket
   }
 }
 

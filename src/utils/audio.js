@@ -6,17 +6,31 @@ class SoundManager {
     this.muted = false
     this.engineOsc = null
     this.engineGain = null
+    this.hasUserInteracted = false
+
+    if (typeof window !== 'undefined') {
+      const unlockAudio = () => {
+        this.hasUserInteracted = true
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {})
+        }
+        window.removeEventListener('pointerdown', unlockAudio)
+        window.removeEventListener('keydown', unlockAudio)
+      }
+      window.addEventListener('pointerdown', unlockAudio, { passive: true })
+      window.addEventListener('keydown', unlockAudio, { passive: true })
+    }
   }
 
   init() {
-    if (!this.ctx) {
+    if (!this.ctx && this.hasUserInteracted) {
       const AudioContext = window.AudioContext || window.webkitAudioContext
       if (AudioContext) {
         this.ctx = new AudioContext()
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume()
+    if (this.ctx && this.ctx.state === 'suspended' && this.hasUserInteracted) {
+      this.ctx.resume().catch(() => {})
     }
   }
 
@@ -136,31 +150,63 @@ class SoundManager {
     }
   }
 
-  // Crash / Flew Away sound
-  playFlewAway() {
+  // Cinematic Explosion Crash Sound
+  playCrash() {
     if (this.muted) return
     this.init()
     this.stopEngine()
     if (!this.ctx) return
 
     try {
-      const osc = this.ctx.createOscillator()
-      const gain = this.ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(360, this.ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(70, this.ctx.currentTime + 0.35)
+      const now = this.ctx.currentTime
 
-      gain.gain.setValueAtTime(0.25, this.ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35)
+      // 1. Deep Sub-Bass Impact Boom
+      const subOsc = this.ctx.createOscillator()
+      const subGain = this.ctx.createGain()
+      subOsc.type = 'sine'
+      subOsc.frequency.setValueAtTime(160, now)
+      subOsc.frequency.exponentialRampToValueAtTime(32, now + 0.6)
 
-      osc.connect(gain)
-      gain.connect(this.ctx.destination)
+      subGain.gain.setValueAtTime(0.45, now)
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65)
 
-      osc.start()
-      osc.stop(this.ctx.currentTime + 0.35)
+      subOsc.connect(subGain)
+      subGain.connect(this.ctx.destination)
+      subOsc.start(now)
+      subOsc.stop(now + 0.65)
+
+      // 2. High-energy explosion rumble & noise blast
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.45)
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1
+      }
+
+      const noise = this.ctx.createBufferSource()
+      noise.buffer = buffer
+
+      const filter = this.ctx.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(900, now)
+      filter.frequency.exponentialRampToValueAtTime(90, now + 0.45)
+
+      const noiseGain = this.ctx.createGain()
+      noiseGain.gain.setValueAtTime(0.35, now)
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45)
+
+      noise.connect(filter)
+      filter.connect(noiseGain)
+      noiseGain.connect(this.ctx.destination)
+
+      noise.start(now)
     } catch (e) {
       // Ignore
     }
+  }
+
+  playFlewAway() {
+    this.playCrash()
   }
 }
 

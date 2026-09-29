@@ -14,9 +14,10 @@ export function getActiveUserId() {
 export const DEFAULT_GAME_ID = 5
 
 export const API_CONFIG = {
-  // Base API URL default to Veronova server or env override
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://root.veronova.co.in',
-  WS_URL: import.meta.env.VITE_WS_URL || '',
+  // Base API URL default to local dev proxy on localhost or Veronova server
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? '' : 'https://root.veronova.co.in'),
+  WS_URL: import.meta.env.VITE_WS_URL || 'https://fctechteamnode.shop/',
+  SOCKET_CHANNEL: import.meta.env.VITE_SOCKET_CHANNEL || 'demobdg_aviator',
   
   // Timeout in milliseconds
   TIMEOUT_MS: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,

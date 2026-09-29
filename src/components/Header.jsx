@@ -10,6 +10,7 @@ export default function Header({
   onlineCount = 2419,
   profile,
   onOpenProfileModal,
+  socketStatus,
 }) {
   const [showDepositMenu, setShowDepositMenu] = useState(false)
 
@@ -45,12 +46,21 @@ export default function Header({
         </button>
       </div>
 
-      {/* Center Online Count */}
+      {/* Center Online Count & Live Socket Status */}
       <div className="header-center">
         <div className="online-badge">
           <span className="online-dot" />
           <span>{onlineCount.toLocaleString()} online</span>
         </div>
+        {socketStatus && (
+          <div
+            className={`socket-badge ${socketStatus.connected ? 'connected' : 'disconnected'}`}
+            title={`Socket API: https://fctechteamnode.shop/ (Channel: ${socketStatus.channel || 'demobdg_aviator'})`}
+          >
+            <span className="socket-dot" />
+            <span>{socketStatus.connected ? (socketStatus.channel || 'demobdg_aviator') : 'Connecting...'}</span>
+          </div>
+        )}
       </div>
 
       {/* Right Controls: Balance + Sound + Fair */}
@@ -122,7 +132,7 @@ export default function Header({
           title="Open Pilot Profile"
         >
           <div className="header-pilot-avatar">
-            {profile?.userimage ? (
+            {profile?.userimage && !profile.userimage.includes('bdgcassino.com') ? (
               <img
                 src={profile.userimage}
                 alt="Pilot"

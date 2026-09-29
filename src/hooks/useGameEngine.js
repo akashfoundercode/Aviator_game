@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { generateCrashPoint, multiplierAtTime } from '../utils/crash'
+import { generateCrashPoint, multiplierAtTime, RUNWAY_TAKEOFF_TIME } from '../utils/crash'
+import { getPlayerProfile, generateRoundPlayers } from '../utils/playerPool'
 import { soundManager } from '../utils/audio'
 import {
   authService,
   betService,
   gameService,
+  socketService,
 } from '../services/api'
 
 export const GAME_STATE = {
@@ -58,14 +60,19 @@ export function useGameEngine() {
   // Real user bet history from POST /api/aviator_history
   const [myBetsHistory, setMyBetsHistory] = useState([])
   
-  // Real multiplayer bets from POST /api/aviator_history (No fake bot generator)
-  const [liveBots, setLiveBots] = useState([])
+  // Simulated dynamic multiplayer bets with realistic names, real human portraits, and cashouts
+  const [liveBots, setLiveBots] = useState(() => generateRoundPlayers(1084816, 38))
   
   // Real round serial number from GET /Aviator/result_half_new.php
   const [roundId, setRoundId] = useState(1084816)
   const [adminMultiply, setAdminMultiply] = useState(0)
   const [winNotification, setWinNotification] = useState(null)
   const [soundMuted, setSoundMuted] = useState(false)
+  const [socketStatus, setSocketStatus] = useState({
+    connected: false,
+    channel: 'demobdg_aviator',
+    lastPacket: null,
+  })
 
   const rafRef = useRef(null)
   const phaseStartRef = useRef(null)
@@ -78,10 +85,24 @@ export function useGameEngine() {
   roundIdRef.current = roundId
   const adminMultiplyRef = useRef(adminMultiply)
   adminMultiplyRef.current = adminMultiply
+  const liveBotsRef = useRef(liveBots)
+  liveBotsRef.current = liveBots
+
+  const gameStateRef = useRef(gameState)
+  gameStateRef.current = gameState
+  const lastSocketTimeRef = useRef(0)
+  const flightStartTsRef = useRef(0)
+  const countdownStartTsRef = useRef(performance.now())
+  const countdownDurationRef = useRef(10.0)
+  const crashToCountdownTimerRef = useRef(null)
 
   const clearRaf = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     rafRef.current = null
+    if (crashToCountdownTimerRef.current) {
+      clearTimeout(crashToCountdownTimerRef.current)
+      crashToCountdownTimerRef.current = null
+    }
   }
 
   // Real user profile data from GET /api/profile?id=1
@@ -93,17 +114,22 @@ export function useGameEngine() {
       if (Array.isArray(historyList) && historyList.length > 0) {
         setMyBetsHistory(historyList)
 
-        // Map real platform bet records into the "All Bets" tab
-        const realPlatformBets = historyList.map((item) => ({
-          id: `real_bet_${item.id}`,
-          user: item.roundId ? `Player_${String(item.roundId).slice(-4)}` : 'Admin',
-          amount: item.amount,
-          cashedOut: item.cashedOut,
-          cashedAt: item.multiplier,
-          payout: item.payout,
-          avatarColor: item.cashedOut ? '#4caf50' : '#e53935',
-        }))
+        // Map real platform bet records into the "All Bets" tab with human avatar photos and names
+        const realPlatformBets = historyList.map((item, idx) => {
+          const profile = getPlayerProfile(item.id || item.roundId || (idx + 100))
+          return {
+            id: `real_bet_${item.id || item.roundId || 'idx'}_${idx}`,
+            user: profile.name,
+            amount: item.amount,
+            cashedOut: item.cashedOut,
+            cashedAt: item.multiplier,
+            payout: item.payout,
+            avatarColor: profile.color,
+            avatarUrl: profile.photo,
+          }
+        })
         setLiveBots(realPlatformBets)
+        liveBotsRef.current = realPlatformBets
       }
     }).catch(() => {})
   }, [])
@@ -284,16 +310,25 @@ export function useGameEngine() {
 
   // ---- Round Lifecycle ----------------------------------------------------
 
-  // Start fresh countdown -> Fetches result_half_new.php for live round serial & admin multiplier
-  const startCountdown = useCallback(() => {
+  // Start fresh countdown -> restarts loading bar and 10s timer cleanly
+  const startCountdown = useCallback((duration = COUNTDOWN_SECONDS) => {
     clearRaf()
     soundManager.stopEngine()
     setGameState(GAME_STATE.COUNTDOWN)
-    setCountdown(COUNTDOWN_SECONDS)
+    gameStateRef.current = GAME_STATE.COUNTDOWN
+    countdownStartTsRef.current = performance.now()
+    countdownDurationRef.current = duration
+    setCountdown(+duration.toFixed(1))
     setMultiplier(1.0)
     setCrashPoint(null)
     setFlightElapsed(0)
     crashPointRef.current = null
+
+    // Fresh dynamic batch of live players with authentic names & human portrait photos
+    const currentRound = roundIdRef.current || 1084816
+    const freshBots = generateRoundPlayers(currentRound, 38)
+    setLiveBots(freshBots)
+    liveBotsRef.current = freshBots
 
     // Sync round serial number & admin multiply from server
     gameService.getResultHalf().then((res) => {
@@ -304,6 +339,9 @@ export function useGameEngine() {
         } else {
           setAdminMultiply(0)
         }
+        const updatedBots = generateRoundPlayers(res.gameSr, 38)
+        setLiveBots(updatedBots)
+        liveBotsRef.current = updatedBots
       }
     }).catch(() => {})
 
@@ -324,36 +362,40 @@ export function useGameEngine() {
     )
   }, [syncWalletBalance, syncBetHistoryFromApi, syncRoundHistoryPills])
 
-  // Countdown timer tick
+  // Countdown timer tick: strictly monotonic decimal countdown (never jumps back and forth)
   useEffect(() => {
-    if (GAME_STOPPED_FOR_TUNING || gameState !== GAME_STATE.COUNTDOWN) return undefined
+    if (gameState !== GAME_STATE.COUNTDOWN) return undefined
 
-    const interval = 100
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        const next = prev - 0.1
-        if (next <= 0) {
-          clearInterval(timer)
-          setGameState(GAME_STATE.FLYING)
-          return 0
-        }
-        return next
-      })
-    }, interval)
+    const interval = setInterval(() => {
+      const now = performance.now()
+      const elapsed = (now - countdownStartTsRef.current) / 1000
+      const remaining = Math.max(0, countdownDurationRef.current - elapsed)
+      setCountdown(+remaining.toFixed(1))
 
-    return () => clearInterval(timer)
+      const isSocketActive = (now - lastSocketTimeRef.current) < 4000
+      if (!isSocketActive && !GAME_STOPPED_FOR_TUNING && remaining <= 0) {
+        clearInterval(interval)
+        setGameState(GAME_STATE.FLYING)
+      }
+    }, 50)
+
+    return () => clearInterval(interval)
   }, [gameState])
 
-  // FLYING phase
+  // Local fallback FLYING loop (only runs when socket is offline)
   useEffect(() => {
     if (gameState !== GAME_STATE.FLYING) return undefined
+
+    // Skip local calculations if socket is actively streaming
+    if (performance.now() - lastSocketTimeRef.current < 4000) {
+      return undefined
+    }
 
     // Lock in all pending bets as ACTIVE
     setBets((prev) =>
       prev.map((b) => (b.status === BET_STATUS.PENDING ? { ...b, status: BET_STATUS.ACTIVE } : b))
     )
 
-    // Determine target crash point: use adminMultiply if set > 1.0, otherwise use algorithm
     let targetCrash = adminMultiplyRef.current > 1.0
       ? adminMultiplyRef.current
       : generateCrashPoint()
@@ -371,24 +413,20 @@ export function useGameEngine() {
       const elapsed = (ts - phaseStartRef.current) / 1000
       const liveM = multiplierAtTime(elapsed)
       const target = crashPointRef.current.value
+      const isAirborne = elapsed >= RUNWAY_TAKEOFF_TIME
 
-      // Crash Condition (FLEW AWAY!)
-      if (liveM >= target) {
+      if (isAirborne && liveM >= target) {
         crashPointRef.current.liveMultiplier = target
         setMultiplier(target)
         setFlightElapsed(elapsed)
         setCrashPoint(target)
         soundManager.playFlewAway()
 
-        // Insert result into server
         gameService.insertResult({ gameSr: currentRound, multiplier: target })
-
-        // Refresh pills & history from server
         syncRoundHistoryPills()
         syncBetHistoryFromApi()
         syncWalletBalance()
 
-        // Resolve active bets as lost
         betsRef.current.forEach((b) => {
           if (b.status === BET_STATUS.ACTIVE) {
             setMyBetsHistory((prevH) =>
@@ -415,13 +453,11 @@ export function useGameEngine() {
         return
       }
 
-      // Normal flight progression
       crashPointRef.current.liveMultiplier = liveM
       setMultiplier(liveM)
       setFlightElapsed(elapsed)
       soundManager.updateEnginePitch(liveM)
 
-      // Auto cashout for player's bets
       betsRef.current.forEach((b, i) => {
         if (b.status === BET_STATUS.ACTIVE && b.autoCashout) {
           const autoTarget = parseFloat(b.autoCashout)
@@ -438,13 +474,13 @@ export function useGameEngine() {
     return () => clearRaf()
   }, [gameState, cashOut, syncRoundHistoryPills, syncBetHistoryFromApi, syncWalletBalance])
 
-  // CRASHED -> Pause before starting new countdown
+  // CRASHED -> Display explosion for 2.4s, then immediately restart countdown and loading bar
   useEffect(() => {
     if (gameState !== GAME_STATE.CRASHED) return undefined
 
     const t = setTimeout(() => {
-      startCountdown()
-    }, CRASH_PAUSE_SECONDS * 1000)
+      startCountdown(10.0)
+    }, 2400)
 
     return () => clearTimeout(t)
   }, [gameState, startCountdown])
@@ -461,6 +497,176 @@ export function useGameEngine() {
       }
     }).catch(() => {})
   }, [syncWalletBalance, syncRoundHistoryPills, syncBetHistoryFromApi])
+
+  // Initialize socket connection to https://fctechteamnode.shop/ for demobdg_aviator
+  useEffect(() => {
+    socketService.connect()
+
+    const unsubStatus = socketService.on('connection_status', (st) => {
+      setSocketStatus((prev) => ({
+        ...prev,
+        connected: Boolean(st?.connected),
+      }))
+    })
+
+    const unsubChannel = socketService.on('demobdg_aviator', (pkt) => {
+      if (!pkt) return
+      const now = performance.now()
+      lastSocketTimeRef.current = now
+
+      setSocketStatus((prev) => ({
+        ...prev,
+        lastPacket: pkt,
+      }))
+
+      const s = Number(pkt.status)
+      const period = Number(pkt.period) || roundIdRef.current
+
+      // 1. Period / Round ID sync
+      if (period && period !== roundIdRef.current) {
+        roundIdRef.current = period
+        setRoundId(period)
+        const roundBots = generateRoundPlayers(period, 38)
+        setLiveBots(roundBots)
+        liveBotsRef.current = roundBots
+      }
+
+      // 2. STATUS 0: COUNTDOWN (Socket 10s Timer)
+      if (s === 0) {
+        const betTime = typeof pkt.betTime === 'number' ? pkt.betTime : (parseFloat(pkt.betTime) || 10)
+
+        if (gameStateRef.current !== GAME_STATE.COUNTDOWN) {
+          startCountdown(betTime)
+        }
+      }
+
+      // 3. STATUS 1: FLYING (Socket live flight & multiplier)
+      else if (s === 1) {
+        const liveM = parseFloat(pkt.timer) || 1.0
+
+        if (gameStateRef.current !== GAME_STATE.FLYING) {
+          clearRaf()
+          setGameState(GAME_STATE.FLYING)
+          gameStateRef.current = GAME_STATE.FLYING
+          flightStartTsRef.current = now
+          soundManager.startEngine()
+
+          // Lock in all pending bets as ACTIVE
+          setBets((prev) =>
+            prev.map((b) => (b.status === BET_STATUS.PENDING ? { ...b, status: BET_STATUS.ACTIVE } : b))
+          )
+
+          // 60 FPS smooth RAF loop for silky-smooth plane flight & background movements
+          const animTick = () => {
+            if (gameStateRef.current !== GAME_STATE.FLYING) return
+            const elapsedNow = (performance.now() - flightStartTsRef.current) / 1000
+            setFlightElapsed(elapsedNow)
+            rafRef.current = requestAnimationFrame(animTick)
+          }
+          rafRef.current = requestAnimationFrame(animTick)
+        }
+
+        const elapsed = (now - flightStartTsRef.current) / 1000
+        setFlightElapsed(elapsed)
+        setMultiplier(liveM)
+        crashPointRef.current = { value: liveM, liveMultiplier: liveM }
+        soundManager.updateEnginePitch(liveM)
+
+        // Live bot cashouts
+        const currentBots = liveBotsRef.current
+        const hasNewCashout = currentBots.some(
+          (b) => !b.cashedOut && b.targetCashout <= liveM
+        )
+        if (hasNewCashout) {
+          const updatedBots = currentBots.map((b) => {
+            if (!b.cashedOut && b.targetCashout <= liveM) {
+              return {
+                ...b,
+                cashedOut: true,
+                cashedAt: b.targetCashout,
+                payout: +(b.amount * b.targetCashout).toFixed(2),
+              }
+            }
+            return b
+          })
+          liveBotsRef.current = updatedBots
+          setLiveBots(updatedBots)
+        }
+
+        // Auto cashout for player's bets
+        betsRef.current.forEach((b, i) => {
+          if (b.status === BET_STATUS.ACTIVE && b.autoCashout) {
+            const autoTarget = parseFloat(b.autoCashout)
+            if (!Number.isNaN(autoTarget) && autoTarget >= 1.01 && liveM >= autoTarget) {
+              cashOut(i)
+            }
+          }
+        })
+      }
+
+      // 4. STATUS 2: CRASHED (Socket flew away / explosion)
+      else if (s === 2) {
+        const finalCrash = parseFloat(pkt.timer) || 1.0
+
+        // Only trigger explosion if currently flying
+        if (gameStateRef.current === GAME_STATE.FLYING) {
+          clearRaf()
+          setGameState(GAME_STATE.CRASHED)
+          gameStateRef.current = GAME_STATE.CRASHED
+          setMultiplier(finalCrash)
+          setCrashPoint(finalCrash)
+          soundManager.playCrash()
+
+          // Optimistically add to top history pills immediately
+          const curRound = roundIdRef.current || period
+          setHistory((prev) => {
+            if (prev.some((h) => h.id === curRound || h.gameSr === curRound)) return prev
+            return [{ id: curRound, gameSr: curRound, multiplier: finalCrash }, ...prev].slice(0, 30)
+          })
+
+          // Resolve active bets as lost
+          betsRef.current.forEach((b) => {
+            if (b.status === BET_STATUS.ACTIVE) {
+              setMyBetsHistory((prevH) =>
+                [
+                  {
+                    roundId: curRound,
+                    amount: b.amount,
+                    multiplier: finalCrash,
+                    payout: 0,
+                    cashedOut: false,
+                    timestamp: Date.now(),
+                  },
+                  ...prevH,
+                ].slice(0, 30)
+              )
+            }
+          })
+
+          setBets((prev) =>
+            prev.map((b) => (b.status === BET_STATUS.ACTIVE ? { ...b, status: BET_STATUS.LOST } : b))
+          )
+
+          // Refresh pills & history from server
+          syncRoundHistoryPills()
+          syncBetHistoryFromApi()
+          syncWalletBalance()
+
+          // Transition to loading page & restart loading bar after 2.4s of explosion!
+          clearTimeout(crashToCountdownTimerRef.current)
+          crashToCountdownTimerRef.current = setTimeout(() => {
+            startCountdown(10.0)
+          }, 2400)
+        }
+      }
+    })
+
+    return () => {
+      unsubStatus()
+      unsubChannel()
+      socketService.disconnect()
+    }
+  }, [cashOut, syncBetHistoryFromApi, syncRoundHistoryPills, syncWalletBalance])
 
   // Initialize first game round
   useEffect(() => {
@@ -487,6 +693,7 @@ export function useGameEngine() {
     userProfile,
     winNotification,
     soundMuted,
+    socketStatus,
     actions: {
       placeBet,
       cancelBet,

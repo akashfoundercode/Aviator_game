@@ -49,9 +49,13 @@ export async function apiRequest(endpoint, options = {}) {
 
   // Construct request headers
   const requestHeaders = {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
     ...headers,
+  }
+
+  // Only set Content-Type if request contains a payload body
+  if (body) {
+    requestHeaders['Content-Type'] = 'application/json'
   }
 
   // Attach Authorization header if authenticated

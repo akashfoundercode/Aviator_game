@@ -25,6 +25,7 @@ export default function App() {
                 soundMuted={game.soundMuted}
                 onToggleSound={game.actions.toggleSound}
                 onOpenFairModal={(tab) => setFairModalTab(tab)}
+                socketStatus={game.socketStatus}
             />
 
             {/* Top History Multiplier Pills */}

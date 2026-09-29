@@ -39,13 +39,22 @@ export function generateProvablyFairHash(roundId, crashPoint) {
   }
 }
 
+export const RUNWAY_TAKEOFF_TIME = 0.60 // Duration plane accelerates on runway tarmac before airborne liftoff
+
 /**
  * Multiplier as a function of elapsed flying time (seconds).
- * Smooth exponential growth: 1.00x at t=0, ~2.00x at ~4.5s, ~5.00x at ~10s, etc.
+ * - While running on the runway (t <= RUNWAY_TAKEOFF_TIME):
+ *   The multiplier stays at 1.00x.
+ * - As soon as the plane takes off into the air (t > RUNWAY_TAKEOFF_TIME):
+ *   The multiplier starts counting up smoothly from 1.00x!
  */
 export function multiplierAtTime(t) {
-  const GROWTH_RATE = 0.155
-  return Math.max(1.00, Math.exp(GROWTH_RATE * t))
+  if (t <= RUNWAY_TAKEOFF_TIME) {
+    return 1.00
+  }
+  const airborneTime = t - RUNWAY_TAKEOFF_TIME
+  const GROWTH_RATE = 0.165
+  return Math.max(1.00, Math.exp(GROWTH_RATE * airborneTime))
 }
 
 /**

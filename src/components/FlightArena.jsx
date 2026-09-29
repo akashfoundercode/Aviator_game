@@ -3,7 +3,11 @@ import World from './World'
 import AviatorPlane from './AviatorPlane'
 import BoardingLoaderOverlay from './BoardingLoaderOverlay'
 import flyingCharacterImg from '../assets/loader/flyingchar.png'
+import characterImg from '../assets/loader/character .png'
+import planeCrashImg from '../assets/plain crash.png'
+import runwayCrashImg from '../assets/runway plain crash.png'
 import { GAME_STATE } from '../hooks/useGameEngine'
+import { RUNWAY_TAKEOFF_TIME } from '../utils/crash'
 
 function getMultiplierTier(m) {
   if (m >= 50) return 'gold'
@@ -23,8 +27,11 @@ export default function FlightArena({
   const containerRef = useRef(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [parachutes, setParachutes] = useState([])
-  const nextParachuteAtRef = useRef(3.4)
+  const [crashParachutes, setCrashParachutes] = useState([])
+  const crashEjectedRef = useRef(false)
+  const nextParachuteAtRef = useRef(0.8)
   const parachuteIdRef = useRef(0)
+  const lastFlightPosRef = useRef({ x: 0, y: 0, rotation: 0, worldOffset: 0, isAirborne: false })
 
   // Observe container dimensions responsively
   useEffect(() => {
@@ -63,9 +70,9 @@ export default function FlightArena({
   let worldOffset = 0
   let isGroundRolling = false
 
-  const SPRINT_START = 1.60 // Phase 1: Slow gentle taxi roll -> Engines build full thrust
-  const ROTATE_START = 2.50 // Phase 2: High-speed sprint -> Nose rotates up (Vr)
-  const LIFTOFF_TIME = 3.30 // Phase 3: Full speed liftoff into the sky
+  const SPRINT_START = 0.20 // Immediate engine thrust surge
+  const ROTATE_START = 0.40 // High-speed sprint -> Nose rotates up (Vr)
+  const LIFTOFF_TIME = RUNWAY_TAKEOFF_TIME // 0.60s: Airborne into the sky
 
   if (gameState === GAME_STATE.COUNTDOWN) {
     // Parked flat on the runway tarmac (0deg level)
@@ -79,19 +86,19 @@ export default function FlightArena({
   } else if (gameState === GAME_STATE.FLYING) {
     const t = flightElapsed
 
-    // Real Airplane Physics:
-    // 1. (0 to 1.6s): Slow taxi roll (gentle creeping forward)
-    // 2. (1.6 to 3.3s): Massive jet engine thrust surge (accelerates rapidly)
-    // 3. (3.3s+): Aerodynamic liftoff & climb
+    // Airplane Physics:
+    // 1. (0 to 0.2s): Immediate thrust surge forward
+    // 2. (0.2 to 0.4s): Nose pitches up (Vr)
+    // 3. (0.6s+): Airborne liftoff into the sky
     let forwardRatio = 0
     if (t < SPRINT_START) {
       const p1 = t / SPRINT_START
-      forwardRatio = Math.pow(p1, 1.8) * 0.12 // slow start
+      forwardRatio = Math.pow(p1, 1.8) * 0.12
     } else if (t < LIFTOFF_TIME) {
       const p2 = (t - SPRINT_START) / (LIFTOFF_TIME - SPRINT_START)
-      forwardRatio = 0.12 + Math.pow(p2, 2.0) * 0.48 // builds massive speed
+      forwardRatio = 0.12 + Math.pow(p2, 2.0) * 0.48
     } else {
-      const p3 = Math.min(1, (t - LIFTOFF_TIME) / 2.0)
+      const p3 = Math.min(1, (t - LIFTOFF_TIME) / 1.5)
       const easeAir = 1 - Math.pow(1 - p3, 2.0)
       forwardRatio = 0.60 + easeAir * 0.40
     }
@@ -99,7 +106,7 @@ export default function FlightArena({
     planeX = runwayStartX + (cruiseX - runwayStartX) * forwardRatio
 
     if (t < SPRINT_START) {
-      // Phase 1: Gentle slow taxi roll on tarmac
+      // Phase 1: Fast initial roll on tarmac
       planeY = runwayY
       rotation = 0
       retract = 0
@@ -131,20 +138,20 @@ export default function FlightArena({
       const climbT = t - LIFTOFF_TIME
 
       // Smooth aerodynamic lift climb
-      const climbP = Math.min(1, climbT / 2.6)
+      const climbP = Math.min(1, climbT / 1.8)
       const easeY = 1 - Math.pow(1 - climbP, 2.4)
       planeY = runwayY - (runwayY - cruiseY) * easeY
 
       // Smooth Rocket Pitch Angle (-48deg upward climb)
-      const pitchP = Math.min(1, climbT / 1.1)
+      const pitchP = Math.min(1, climbT / 1.0)
       const easePitch = pitchP * pitchP * (3 - 2 * pitchP)
       const targetRocketPitch = -15.0 + (-33.0 * easePitch) // Pitches smoothly up to -48deg
       const microRocketSway = Math.sin(climbT * 2.8) * 0.5
       rotation = targetRocketPitch + microRocketSway
 
       // Landing Gear Retraction
-      const gearDelay = 0.2
-      const gearDuration = 0.75
+      const gearDelay = 0.1
+      const gearDuration = 0.5
       retract = Math.min(1, Math.max(0, (climbT - gearDelay) / gearDuration))
 
       // Aerodynamic micro-sway
@@ -158,14 +165,23 @@ export default function FlightArena({
       worldOffset = height * (easeY * 1.0 + milestoneScroll)
       vibration = 0
     }
+
+    lastFlightPosRef.current = {
+      x: planeX,
+      y: planeY,
+      rotation,
+      worldOffset,
+      isAirborne: t >= LIFTOFF_TIME,
+    }
   } else if (gameState === GAME_STATE.CRASHED) {
-    planeX = width + 320
-    planeY = -280
-    rotation = -55
-    retract = 1
+    const crashedOnRunway = !lastFlightPosRef.current.isAirborne
+    planeX = lastFlightPosRef.current.x
+    planeY = crashedOnRunway ? runwayY : lastFlightPosRef.current.y
+    rotation = crashedOnRunway ? 0 : (lastFlightPosRef.current.rotation || -40)
+    worldOffset = lastFlightPosRef.current.worldOffset
+    retract = crashedOnRunway ? 0 : 1
     vibration = 0
-    worldOffset = height * 8
-    isGroundRolling = false
+    isGroundRolling = crashedOnRunway
   }
 
   const isFlying = gameState === GAME_STATE.FLYING
@@ -173,10 +189,55 @@ export default function FlightArena({
   const isCountdown = gameState === GAME_STATE.COUNTDOWN
   const multTier = getMultiplierTier(multiplier)
 
+  // Emergency mass character ejection upon crash
   useEffect(() => {
     if (isCountdown) {
       setParachutes([])
-      nextParachuteAtRef.current = 3.4
+      setCrashParachutes([])
+      crashEjectedRef.current = false
+      nextParachuteAtRef.current = 0.8
+      parachuteIdRef.current = 0
+      return
+    }
+
+    if (isCrashed && !crashEjectedRef.current) {
+      crashEjectedRef.current = true
+      const cx = lastFlightPosRef.current.x
+      const cy = lastFlightPosRef.current.y
+
+      // 10 Distinct radial trajectories throwing all characters outward in all directions
+      const crashTrajectories = [
+        'crash-traj-up-left',
+        'crash-traj-up-high',
+        'crash-traj-up-right',
+        'crash-traj-far-left',
+        'crash-traj-far-right',
+        'crash-traj-down-left',
+        'crash-traj-down-right',
+        'crash-traj-loop-left',
+        'crash-traj-high-catapult',
+        'crash-traj-spin-out',
+      ]
+
+      const massBurst = crashTrajectories.map((traj, idx) => ({
+        id: `crash_p_${idx}_${Date.now()}`,
+        left: cx + (Math.random() * 30 - 15),
+        top: cy + (Math.random() * 20 - 10),
+        trajectoryClass: traj,
+        delay: +(idx * 0.03).toFixed(2),
+        duration: +(3.2 + (idx % 3) * 0.4).toFixed(2),
+        scale: +(0.85 + (idx % 4) * 0.08).toFixed(2),
+        img: idx % 2 === 0 ? flyingCharacterImg : characterImg,
+      }))
+
+      setCrashParachutes(massBurst)
+    }
+  }, [isCountdown, isCrashed])
+
+  useEffect(() => {
+    if (isCountdown) {
+      setParachutes([])
+      nextParachuteAtRef.current = 0.8
       parachuteIdRef.current = 0
       return
     }
@@ -193,15 +254,76 @@ export default function FlightArena({
     const rotX = relX * Math.cos(rad) - relY * Math.sin(rad)
     const rotY = relX * Math.sin(rad) + relY * Math.cos(rad)
 
-    const parachute = {
-      id: parachuteIdRef.current,
-      left: centerX + rotX - 33,
-      top: centerY + rotY - 33,
+    // Randomly decide burst count: single (1) vs group of 2, 3, or 4 characters
+    const rand = Math.random()
+    let burstCount = 1
+    if (rand < 0.38) {
+      burstCount = 1 // Single character
+    } else if (rand < 0.65) {
+      burstCount = 3 // 3 characters together
+    } else if (rand < 0.86) {
+      burstCount = 4 // 4 characters together
+    } else {
+      burstCount = 2 // 2 characters together
     }
-    parachuteIdRef.current += 1
-    const nextInterval = parachuteIdRef.current < 3 ? 1.0 : 2.2
+
+    const TRAJECTORIES = ['traj-standard', 'traj-high', 'traj-wide', 'traj-low']
+    const newBurst = []
+
+    for (let i = 0; i < burstCount; i++) {
+      const pId = parachuteIdRef.current + i
+      let traj = TRAJECTORIES[i % TRAJECTORIES.length]
+      let delay = 0
+      let offsetX = 0
+      let offsetY = 0
+      let scale = 1.0
+
+      if (burstCount === 1) {
+        traj = TRAJECTORIES[Math.floor(Math.random() * TRAJECTORIES.length)]
+        delay = 0
+        scale = 1.0
+      } else if (burstCount === 2) {
+        traj = i === 0 ? 'traj-standard' : 'traj-wide'
+        delay = i * 0.12
+        offsetX = i === 0 ? -10 : 12
+        offsetY = i === 0 ? -8 : 8
+        scale = i === 0 ? 1.05 : 0.95
+      } else if (burstCount === 3) {
+        const tripleTrajs = ['traj-high', 'traj-standard', 'traj-wide']
+        traj = tripleTrajs[i]
+        delay = i * 0.09
+        offsetX = (i - 1) * 16 + (Math.random() * 6 - 3)
+        offsetY = (i - 1) * 12 + (Math.random() * 6 - 3)
+        scale = 0.92 + i * 0.08
+      } else {
+        const quadTrajs = ['traj-high', 'traj-standard', 'traj-low', 'traj-wide']
+        traj = quadTrajs[i]
+        delay = i * 0.08
+        offsetX = (i - 1.5) * 15 + (Math.random() * 8 - 4)
+        offsetY = (i - 1.5) * 10 + (Math.random() * 8 - 4)
+        scale = 0.90 + (i % 3) * 0.08
+      }
+
+      newBurst.push({
+        id: pId,
+        left: centerX + rotX - 33 + offsetX,
+        top: centerY + rotY - 33 + offsetY,
+        trajectoryClass: traj,
+        delay: +delay.toFixed(2),
+        duration: +(2.8 + (i % 2) * 0.4).toFixed(2),
+        scale: +scale.toFixed(2),
+      })
+    }
+
+    parachuteIdRef.current += burstCount
+
+    // Adaptive interval between burst releases
+    const nextInterval = burstCount >= 3
+      ? 2.4 + Math.random() * 1.6
+      : 1.5 + Math.random() * 1.3
+
     nextParachuteAtRef.current = flightElapsed + nextInterval
-    setParachutes((current) => [...current, parachute])
+    setParachutes((current) => [...current, ...newBurst])
   }, [isCountdown, isFlying, flightElapsed, planeX, planeY, rotation, width])
 
 
@@ -215,10 +337,10 @@ export default function FlightArena({
         multiplier={multiplier}
       />
 
-      {/* Jet Actor Container (Active during Flight & Crash) */}
-      {!isCountdown && (
+      {/* Jet Actor Container (Active during Flight) */}
+      {isFlying && (
         <div
-          className={`plane-actor-container ${isCrashed ? 'plane-flew-away' : ''}`}
+          className="plane-actor-container"
           style={{
             left: `${planeX}px`,
             top: `${planeY}px`,
@@ -234,16 +356,59 @@ export default function FlightArena({
         </div>
       )}
 
+      {/* Exploding Crashed Jet Actor: Runway Crash vs Air Crash */}
+      {isCrashed && (
+        <div
+          className={`plane-actor-container plane-crashed-actor ${lastFlightPosRef.current.isAirborne ? 'air-crash' : 'runway-crash'}`}
+          style={{
+            left: `${planeX}px`,
+            top: `${planeY}px`,
+            transform: lastFlightPosRef.current.isAirborne
+              ? `translate(-32%, -72%) rotate(${rotation}deg)`
+              : `translate(-32%, -85%) rotate(0deg)`,
+          }}
+        >
+          {/* Shockwave Rings */}
+          <div className="crash-shockwave-ring ring-1" />
+          <div className="crash-shockwave-ring ring-2" />
+          <div className="crash-fire-core" />
+
+          {/* Sparks & Shrapnel Debris */}
+          <div className="crash-debris-field" aria-hidden="true">
+            <span className="crash-spark spk-1" />
+            <span className="crash-spark spk-2" />
+            <span className="crash-spark spk-3" />
+            <span className="crash-spark spk-4" />
+            <span className="crash-spark spk-5" />
+            <span className="crash-spark spk-6" />
+            <span className="crash-smoke-cloud smk-1" />
+            <span className="crash-smoke-cloud smk-2" />
+          </div>
+
+          {/* Runway Crash on ground, In-air crash in the sky */}
+          <img
+            src={lastFlightPosRef.current.isAirborne ? planeCrashImg : runwayCrashImg}
+            alt="Plane Crashed"
+            className={`plane-crash-sprite-img ${lastFlightPosRef.current.isAirborne ? 'air-crash-img' : 'runway-crash-img'}`}
+            draggable="false"
+          />
+        </div>
+      )}
+
+      {/* Regular In-flight Parachutes */}
       {parachutes.map((parachute) => (
         <div
           key={parachute.id}
-          className="flight-parachute-eject"
+          className={`flight-parachute-eject ${parachute.trajectoryClass || ''}`}
           style={{
             left: `${parachute.left}px`,
             top: `${parachute.top}px`,
+            animationDelay: `${parachute.delay || 0}s`,
+            animationDuration: `${parachute.duration || 3.0}s`,
+            transform: `scale(${parachute.scale || 1})`,
           }}
           onAnimationEnd={(e) => {
-            if (e.target === e.currentTarget && e.animationName === 'parachuteEject') {
+            if (e.target === e.currentTarget) {
               setParachutes((current) => current.filter((item) => item.id !== parachute.id))
             }
           }}
@@ -251,6 +416,25 @@ export default function FlightArena({
         >
           <span className="eject-blast-puff" onAnimationEnd={(e) => e.stopPropagation()} />
           <img src={flyingCharacterImg} alt="" draggable="false" />
+        </div>
+      ))}
+
+      {/* Emergency Crash Mass Character Ejection (All characters thrown out upon crash!) */}
+      {crashParachutes.map((char) => (
+        <div
+          key={char.id}
+          className={`flight-parachute-eject crash-mass-eject ${char.trajectoryClass || ''}`}
+          style={{
+            left: `${char.left}px`,
+            top: `${char.top}px`,
+            animationDelay: `${char.delay || 0}s`,
+            animationDuration: `${char.duration || 3.2}s`,
+            transform: `scale(${char.scale || 1})`,
+          }}
+          aria-hidden="true"
+        >
+          <span className="eject-blast-puff" onAnimationEnd={(e) => e.stopPropagation()} />
+          <img src={char.img} alt="" draggable="false" />
         </div>
       ))}
 
@@ -269,17 +453,19 @@ export default function FlightArena({
           <div className={`premium-multiplier-display tier-${multTier}`}>
             <div className="multiplier-ambient-halo" />
             <div className="multiplier-digits-wrap">
-              <span className="multiplier-number">{multiplier.toFixed(2)}</span>
+              <span className="multiplier-number">
+                {multiplier.toFixed(2)}
+              </span>
               <span className="multiplier-x-badge">x</span>
             </div>
           </div>
         )}
 
-        {/* Crashed / Flew Away State */}
+        {/* Crashed State Card */}
         {isCrashed && (
-          <div className="premium-flew-away-card">
-            <div className="flew-away-title">FLEW AWAY!</div>
-            <div className="flew-away-multiplier">
+          <div className="premium-flew-away-card premium-crashed-card">
+            <div className="flew-away-title crashed-title">CRASHED</div>
+            <div className="flew-away-multiplier crashed-multiplier">
               {crashPoint ? crashPoint.toFixed(2) : multiplier.toFixed(2)}
               <span className="mult-x-tag">x</span>
             </div>

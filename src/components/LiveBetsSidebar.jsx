@@ -85,7 +85,9 @@ export default function LiveBetsSidebar({
               return (
                 <div key={`my-active-${idx}`} className="bet-row user-own-bet-row">
                   <div className="user-col">
-                    <span className="user-avatar-dot user-avatar-me">YOU</span>
+                    <div className="user-avatar-frame">
+                      <span className="user-avatar-dot user-avatar-me">YOU</span>
+                    </div>
                     <span className="username">You (Panel {idx + 1})</span>
                   </div>
                   <div className="amount-col">₹{ub.amount}</div>
@@ -122,12 +124,31 @@ export default function LiveBetsSidebar({
                 className={`bet-row ${bot.cashedOut ? 'row-cashed-out' : ''}`}
               >
                 <div className="user-col">
-                  <span
-                    className="user-avatar-dot"
-                    style={{ backgroundColor: bot.avatarColor }}
-                  >
-                    {bot.user.slice(0, 2).toUpperCase()}
-                  </span>
+                  <div className="user-avatar-frame">
+                    {bot.avatarUrl ? (
+                      <img
+                        src={bot.avatarUrl}
+                        alt=""
+                        className="user-avatar-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                          if (e.currentTarget.nextSibling) {
+                            e.currentTarget.nextSibling.style.display = 'flex'
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <span
+                      className="user-avatar-dot"
+                      style={{
+                        backgroundColor: bot.avatarColor || '#e53935',
+                        display: bot.avatarUrl ? 'none' : 'flex',
+                      }}
+                    >
+                      {(bot.user || 'P').slice(0, 2).toUpperCase()}
+                    </span>
+                  </div>
                   <span className="username">{bot.user}</span>
                 </div>
                 <div className="amount-col">₹{bot.amount}</div>
@@ -208,7 +229,30 @@ export default function LiveBetsSidebar({
               topWins.map((item, idx) => (
                 <div key={`top-${idx}`} className="bet-row">
                   <div className="user-col">
-                    <span className="user-avatar-dot top-rank-dot">#{idx + 1}</span>
+                    <div className="user-avatar-frame">
+                      {item.avatarUrl ? (
+                        <img
+                          src={item.avatarUrl}
+                          alt=""
+                          className="user-avatar-img"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            if (e.currentTarget.nextSibling) {
+                              e.currentTarget.nextSibling.style.display = 'flex'
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="user-avatar-dot top-rank-dot"
+                        style={{
+                          display: item.avatarUrl ? 'none' : 'flex',
+                        }}
+                      >
+                        #{idx + 1}
+                      </span>
+                    </div>
                     <span className="username">{item.user || 'You'}</span>
                   </div>
                   <div className="amount-col">₹{item.amount}</div>

@@ -227,6 +227,40 @@ button:active {
     box-shadow: 0 0 8px #10b981;
 }
 
+.socket-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #10b981;
+    font-family: monospace;
+    transition: all 0.25s ease;
+}
+
+.socket-badge.disconnected {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+}
+
+.socket-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+}
+
+.socket-badge.disconnected .socket-dot {
+    background: #ef4444;
+    box-shadow: 0 0 6px #ef4444;
+}
+
 .balance-container {
     display: flex;
     align-items: center;
@@ -618,9 +652,30 @@ button:active {
     overflow: hidden;
 }
 
+.user-avatar-frame {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
 .user-avatar-dot {
-    width: 18px;
-    height: 18px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     color: #fff;
     font-size: 8px;
@@ -1369,6 +1424,22 @@ button:active {
     animation: parachuteEject 3.0s cubic-bezier(0.2, 0.75, 0.35, 1) forwards;
 }
 
+.flight-parachute-eject.traj-standard {
+    animation-name: parachuteEject;
+}
+
+.flight-parachute-eject.traj-high {
+    animation-name: parachuteEjectHigh;
+}
+
+.flight-parachute-eject.traj-wide {
+    animation-name: parachuteEjectWide;
+}
+
+.flight-parachute-eject.traj-low {
+    animation-name: parachuteEjectLow;
+}
+
 .eject-blast-puff {
     position: absolute;
     top: 50%;
@@ -1446,6 +1517,397 @@ button:active {
         /* Smoothly exits out of bottom screen */
         transform: translate(-365px, 720px) scale(0.96) rotate(0deg);
     }
+}
+
+@keyframes parachuteEjectHigh {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.35) rotate(-10deg);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translate(-120px, -190px) scale(0.90) rotate(-35deg);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-220px, -300px) scale(1.18) rotate(-12deg);
+    }
+
+    32% {
+        opacity: 1;
+        transform: translate(-280px, -170px) scale(1.10) rotate(8deg);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-315px, 60px) scale(1.04) rotate(-4deg);
+    }
+
+    72% {
+        opacity: 1;
+        transform: translate(-330px, 360px) scale(0.99) rotate(6deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-345px, 720px) scale(0.96) rotate(0deg);
+    }
+}
+
+@keyframes parachuteEjectWide {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.35) rotate(-20deg);
+    }
+
+    9% {
+        opacity: 1;
+        transform: translate(-180px, -130px) scale(0.85) rotate(-22deg);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-340px, -180px) scale(1.12) rotate(-5deg);
+    }
+
+    32% {
+        opacity: 1;
+        transform: translate(-410px, -80px) scale(1.06) rotate(12deg);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-440px, 120px) scale(1.00) rotate(-8deg);
+    }
+
+    75% {
+        opacity: 1;
+        transform: translate(-460px, 400px) scale(0.97) rotate(4deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-480px, 720px) scale(0.94) rotate(0deg);
+    }
+}
+
+@keyframes parachuteEjectLow {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.35) rotate(-12deg);
+    }
+
+    8% {
+        opacity: 1;
+        transform: translate(-110px, -110px) scale(0.82) rotate(-25deg);
+    }
+
+    18% {
+        opacity: 1;
+        transform: translate(-200px, -150px) scale(1.08) rotate(-7deg);
+    }
+
+    28% {
+        opacity: 1;
+        transform: translate(-250px, -50px) scale(1.04) rotate(7deg);
+    }
+
+    45% {
+        opacity: 1;
+        transform: translate(-275px, 150px) scale(0.99) rotate(-5deg);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translate(-290px, 420px) scale(0.97) rotate(5deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-305px, 720px) scale(0.95) rotate(0deg);
+    }
+}
+
+/* ==========================================================================
+   CRASH EXPLOSION BLAST & SHOCKWAVE SYSTEM (NO STATIC CRASH PNG)
+   ========================================================================== */
+.plane-crashed-blast {
+    position: absolute;
+    z-index: 14;
+    width: 2px;
+    height: 2px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* Blinding Initial Fireball Flash */
+.crash-explosion-flash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 240px;
+    height: 240px;
+    margin-left: -120px;
+    margin-top: -120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, rgba(255, 235, 120, 0.95) 30%, rgba(255, 70, 0, 0.75) 60%, transparent 85%);
+    filter: blur(6px);
+    pointer-events: none;
+    animation: crashFlashExpand 0.5s ease-out forwards;
+}
+
+@keyframes crashFlashExpand {
+    0% {
+        transform: scale(0.2);
+        opacity: 1;
+    }
+    35% {
+        transform: scale(1.6);
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+/* Shockwave Rings */
+.crash-shockwave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    border-radius: 50%;
+    border: 4px solid #ffea00;
+    box-shadow: 0 0 35px #ff4400, inset 0 0 35px #ff7700;
+    pointer-events: none;
+    animation: crashShockwaveAnim 0.8s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+}
+
+.crash-shockwave-ring.ring-2 {
+    animation-delay: 0.12s;
+    border-color: #ff3300;
+}
+
+@keyframes crashShockwaveAnim {
+    0% {
+        transform: scale(0.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(8.5);
+        opacity: 0;
+    }
+}
+
+/* Fiery Explosion Core */
+.crash-fire-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    margin-left: -75px;
+    margin-top: -75px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #ffea00 30%, #ff4400 65%, transparent 85%);
+    filter: blur(5px);
+    pointer-events: none;
+    animation: crashFireCoreAnim 0.7s ease-out forwards;
+}
+
+@keyframes crashFireCoreAnim {
+    0% {
+        transform: scale(0.3);
+        opacity: 1;
+    }
+    45% {
+        transform: scale(1.8);
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+/* Flying Sparks & Shrapnel */
+.crash-debris-field {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.crash-spark {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 12px #ffdd00, 0 0 25px #ff2200;
+}
+
+.crash-spark.spk-1 { animation: sparkBlast1 0.75s ease-out forwards; }
+.crash-spark.spk-2 { animation: sparkBlast2 0.75s ease-out forwards; }
+.crash-spark.spk-3 { animation: sparkBlast3 0.75s ease-out forwards; }
+.crash-spark.spk-4 { animation: sparkBlast4 0.75s ease-out forwards; }
+.crash-spark.spk-5 { animation: sparkBlast5 0.75s ease-out forwards; }
+.crash-spark.spk-6 { animation: sparkBlast6 0.75s ease-out forwards; }
+
+@keyframes sparkBlast1 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(160px, -140px) scale(0); opacity: 0; } }
+@keyframes sparkBlast2 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(140px, 120px) scale(0); opacity: 0; } }
+@keyframes sparkBlast3 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(-130px, 150px) scale(0); opacity: 0; } }
+@keyframes sparkBlast4 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(-170px, -40px) scale(0); opacity: 0; } }
+@keyframes sparkBlast5 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(-80px, -170px) scale(0); opacity: 0; } }
+@keyframes sparkBlast6 { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(70px, -160px) scale(0); opacity: 0; } }
+
+/* Smoke Clouds */
+.crash-smoke-cloud {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    margin-left: -30px;
+    margin-top: -30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(60, 60, 70, 0.85) 0%, rgba(30, 30, 35, 0.6) 55%, transparent 80%);
+    filter: blur(6px);
+    pointer-events: none;
+    animation: smokeCloudAnim 1.6s ease-out forwards;
+}
+
+.crash-smoke-cloud.smk-1 { animation-delay: 0.05s; }
+.crash-smoke-cloud.smk-2 { animation-delay: 0.15s; }
+
+@keyframes smokeCloudAnim {
+    0% { transform: scale(0.4) translate(0, 0); opacity: 0.9; }
+    50% { transform: scale(2.2) translate(-25px, -35px); opacity: 0.6; }
+    100% { transform: scale(3.5) translate(-45px, -70px); opacity: 0; }
+}
+
+/* ==========================================================================
+   EMERGENCY MASS CRASH CHARACTER BAILOUT TRAJECTORIES (ALL OUTWARD)
+   ========================================================================== */
+.flight-parachute-eject.crash-mass-eject {
+    z-index: 16;
+}
+
+.flight-parachute-eject.crash-traj-up-left {
+    animation-name: crashTrajUpLeft;
+}
+.flight-parachute-eject.crash-traj-up-high {
+    animation-name: crashTrajUpHigh;
+}
+.flight-parachute-eject.crash-traj-up-right {
+    animation-name: crashTrajUpRight;
+}
+.flight-parachute-eject.crash-traj-far-left {
+    animation-name: crashTrajFarLeft;
+}
+.flight-parachute-eject.crash-traj-far-right {
+    animation-name: crashTrajFarRight;
+}
+.flight-parachute-eject.crash-traj-down-left {
+    animation-name: crashTrajDownLeft;
+}
+.flight-parachute-eject.crash-traj-down-right {
+    animation-name: crashTrajDownRight;
+}
+.flight-parachute-eject.crash-traj-loop-left {
+    animation-name: crashTrajLoopLeft;
+}
+.flight-parachute-eject.crash-traj-high-catapult {
+    animation-name: crashTrajHighCatapult;
+}
+.flight-parachute-eject.crash-traj-spin-out {
+    animation-name: crashTrajSpinOut;
+}
+
+@keyframes crashTrajUpLeft {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    14% { opacity: 1; transform: translate(-210px, -190px) scale(1.12) rotate(-45deg); }
+    26% { opacity: 1; transform: translate(-300px, -240px) scale(1.15) rotate(-15deg); }
+    60% { opacity: 1; transform: translate(-340px, 140px) scale(1.0) rotate(8deg); }
+    100% { opacity: 1; transform: translate(-360px, 660px) scale(0.95) rotate(0deg); }
+}
+
+@keyframes crashTrajUpHigh {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    14% { opacity: 1; transform: translate(-40px, -270px) scale(1.15) rotate(20deg); }
+    28% { opacity: 1; transform: translate(-70px, -360px) scale(1.20) rotate(5deg); }
+    60% { opacity: 1; transform: translate(-95px, 110px) scale(1.0) rotate(-6deg); }
+    100% { opacity: 1; transform: translate(-110px, 680px) scale(0.95) rotate(0deg); }
+}
+
+@keyframes crashTrajUpRight {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    14% { opacity: 1; transform: translate(190px, -200px) scale(1.12) rotate(35deg); }
+    26% { opacity: 1; transform: translate(270px, -270px) scale(1.15) rotate(12deg); }
+    60% { opacity: 1; transform: translate(300px, 150px) scale(1.0) rotate(-8deg); }
+    100% { opacity: 1; transform: translate(320px, 670px) scale(0.95) rotate(0deg); }
+}
+
+@keyframes crashTrajFarLeft {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    16% { opacity: 1; transform: translate(-330px, -90px) scale(1.1) rotate(-60deg); }
+    32% { opacity: 1; transform: translate(-430px, -50px) scale(1.05) rotate(-15deg); }
+    65% { opacity: 1; transform: translate(-450px, 260px) scale(0.98) rotate(6deg); }
+    100% { opacity: 1; transform: translate(-470px, 650px) scale(0.92) rotate(0deg); }
+}
+
+@keyframes crashTrajFarRight {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    16% { opacity: 1; transform: translate(310px, -80px) scale(1.1) rotate(55deg); }
+    32% { opacity: 1; transform: translate(400px, -40px) scale(1.05) rotate(15deg); }
+    65% { opacity: 1; transform: translate(420px, 280px) scale(0.98) rotate(-6deg); }
+    100% { opacity: 1; transform: translate(440px, 650px) scale(0.92) rotate(0deg); }
+}
+
+@keyframes crashTrajDownLeft {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    16% { opacity: 1; transform: translate(-180px, 140px) scale(1.08) rotate(-35deg); }
+    36% { opacity: 1; transform: translate(-240px, 270px) scale(1.02) rotate(12deg); }
+    70% { opacity: 1; transform: translate(-260px, 500px) scale(0.97) rotate(-5deg); }
+    100% { opacity: 1; transform: translate(-280px, 720px) scale(0.92) rotate(0deg); }
+}
+
+@keyframes crashTrajDownRight {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    16% { opacity: 1; transform: translate(170px, 150px) scale(1.08) rotate(35deg); }
+    36% { opacity: 1; transform: translate(230px, 280px) scale(1.02) rotate(-12deg); }
+    70% { opacity: 1; transform: translate(250px, 510px) scale(0.97) rotate(5deg); }
+    100% { opacity: 1; transform: translate(270px, 720px) scale(0.92) rotate(0deg); }
+}
+
+@keyframes crashTrajLoopLeft {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    14% { opacity: 1; transform: translate(-150px, -180px) scale(1.12) rotate(-180deg); }
+    26% { opacity: 1; transform: translate(-240px, -200px) scale(1.15) rotate(-360deg); }
+    60% { opacity: 1; transform: translate(-290px, 170px) scale(1.0) rotate(-370deg); }
+    100% { opacity: 1; transform: translate(-310px, 660px) scale(0.95) rotate(-360deg); }
+}
+
+@keyframes crashTrajHighCatapult {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    15% { opacity: 1; transform: translate(-120px, -330px) scale(1.22) rotate(-28deg); }
+    30% { opacity: 1; transform: translate(-170px, -410px) scale(1.18) rotate(8deg); }
+    60% { opacity: 1; transform: translate(-200px, 130px) scale(1.0) rotate(-5deg); }
+    100% { opacity: 1; transform: translate(-220px, 680px) scale(0.95) rotate(0deg); }
+}
+
+@keyframes crashTrajSpinOut {
+    0% { opacity: 1; transform: translate(0, 0) scale(0.35) rotate(0deg); }
+    15% { opacity: 1; transform: translate(150px, -180px) scale(1.12) rotate(270deg); }
+    30% { opacity: 1; transform: translate(210px, -240px) scale(1.15) rotate(540deg); }
+    60% { opacity: 1; transform: translate(240px, 170px) scale(1.0) rotate(700deg); }
+    100% { opacity: 1; transform: translate(260px, 660px) scale(0.95) rotate(720deg); }
 }
 
 .aviator-plane-wrapper {
@@ -3004,7 +3466,7 @@ button:active {
     text-shadow: 0 0 28px #fbbf24;
 }
 
-/* Flew Away Card */
+/* Flew Away / Crashed Card */
 .premium-flew-away-card {
     display: flex;
     flex-direction: column;
@@ -3014,26 +3476,33 @@ button:active {
 }
 
 .flew-away-title {
-    font-size: clamp(24px, 4vw, 38px);
+    font-size: clamp(26px, 4.5vw, 42px);
     font-weight: 900;
     font-style: italic;
-    color: #ff3344;
-    letter-spacing: 2px;
-    text-shadow: 0 0 30px rgba(255, 51, 68, 0.85);
+    color: #ff2233;
+    letter-spacing: 3px;
+    text-shadow: 0 0 25px rgba(255, 34, 51, 0.95), 0 0 50px rgba(255, 80, 0, 0.8);
+    animation: crashTitleGlow 0.35s ease-out;
+}
+
+@keyframes crashTitleGlow {
+    0% { transform: scale(0.6); filter: brightness(3); }
+    50% { transform: scale(1.15); filter: brightness(1.8); }
+    100% { transform: scale(1.0); filter: brightness(1.0); }
 }
 
 .flew-away-multiplier {
     font-size: clamp(48px, 7vw, 76px);
     font-weight: 900;
-    color: #ff4d4f;
+    color: #ff3b30;
     letter-spacing: -1px;
-    text-shadow: 0 0 35px rgba(255, 51, 68, 0.6);
+    text-shadow: 0 0 35px rgba(255, 51, 68, 0.8), 0 0 15px rgba(255, 180, 0, 0.5);
 }
 
 .mult-x-tag {
     font-size: 0.75em;
     margin-left: 2px;
-    color: #ff3344;
+    color: #ff2233;
 }
 
 /* Win Toast Banner */
