@@ -816,7 +816,7 @@ button:active {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 30%, #0c1228 0%, #060914 70%, #02040a 100%);
+    background: #000206;
     z-index: 1;
 }
 
@@ -830,14 +830,34 @@ button:active {
     will-change: transform;
 }
 
-/* 1. Deep Space gradient (top infinite atmosphere) */
+/* 1. Deep Space backdrop behind looping night frames */
 .world-deepspace {
     position: absolute;
-    bottom: 100%;
+    bottom: 0;
     left: 0;
     right: 0;
-    height: 600%;
-    background: linear-gradient(180deg, #02040a 0%, #060a17 50%, #0e1529 100%);
+    height: 4500%;
+    background: linear-gradient(180deg, #000104 0%, #030610 50%, #000104 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Continuous seamless looping night sky frames (nightframe.png) */
+.world-night-sky-frame {
+    position: absolute;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.night-sky-loop-art {
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center bottom;
     pointer-events: none;
 }
 
@@ -888,6 +908,8 @@ button:active {
     height: 100%;
     overflow: hidden;
     background: transparent;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .night-frame-art {
@@ -2588,7 +2610,6 @@ button:active {
     -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
     animation: boardingFadeIn 0.25s ease-out;
-    contain: layout paint;
 }
 
 @keyframes boardingFadeIn {
@@ -2605,6 +2626,7 @@ button:active {
 .boarding-loader-hud {
     position: relative;
     width: min(95%, 640px);
+    min-height: 380px;
     max-height: 96%;
     background: rgba(12, 16, 28, 0.96);
     border: 1.5px solid rgba(255, 42, 75, 0.45);
@@ -2618,7 +2640,6 @@ button:active {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     gap: clamp(4px, 1vh, 8px);
-    contain: layout;
 }
 
 /* ==========================================================================
@@ -2885,8 +2906,9 @@ button:active {
 .boarding-stage-wrapper {
     position: relative;
     width: 100%;
-    height: clamp(200px, 28vw, 250px);
-    min-height: 0;
+    flex: 1 1 auto;
+    min-height: 160px;
+    height: clamp(180px, 26vw, 240px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4500,54 +4522,93 @@ button:active {
     }
 
     .boarding-stage-wrapper {
-        height: clamp(88px, 22cqh, 130px);
+        flex: 1 1 auto;
+        width: 100%;
+        min-height: 125px;
+        max-height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
         overflow: visible;
-        contain: none;
+        margin: 2px 0;
     }
 
     .boarding-plane-box {
+        position: relative;
         height: 100%;
+        max-height: 100%;
         width: auto;
-        max-width: 90%;
         aspect-ratio: 1548 / 1016;
-        transform: scale(1.02) translateZ(0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(1.15) translateZ(0);
         transform-origin: center center;
         will-change: transform;
         overflow: visible;
-        contain: none;
     }
 
     .hud-bottom-telemetry {
+        flex-shrink: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         gap: 3px;
+        margin-top: 0;
         padding-bottom: 2px;
     }
 
-    .hud-telemetry-status {
-        font-size: 7.5px;
-        gap: 3px;
+    .hud-loading-bar-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: clamp(200px, 86%, 300px);
+        margin-top: 8px;
     }
 
-    .hud-loading-bar-wrapper {
-        max-width: clamp(180px, 82%, 260px);
+    .hud-telemetry-status {
+        position: absolute;
+        bottom: calc(100% + 2px);
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 7.5px;
+        letter-spacing: 0.8px;
+        gap: 4px;
+        white-space: nowrap;
     }
 
     .hud-image-percent-text {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .hud-milestone-timeline {
-        padding: 0 2px;
-        gap: 1px;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0 4px;
+        margin-top: 2px;
+        box-sizing: border-box;
+    }
+
+    .milestone-track-line {
+        position: absolute;
+        top: 8px;
+        left: 12px;
+        right: 12px;
+        height: 1px;
     }
 
     .milestone-badge-circle {
-        width: 16px;
-        height: 16px;
+        width: 15px;
+        height: 15px;
     }
 
     .hud-milestone-item.active .milestone-badge-circle.active-glow {
-        width: 19px;
-        height: 19px;
+        width: 17px;
+        height: 17px;
     }
 
     .milestone-svg {
@@ -4556,14 +4617,15 @@ button:active {
     }
 
     .hud-milestone-item.active .milestone-svg {
-        width: 9.5px;
-        height: 9.5px;
+        width: 8.5px;
+        height: 8.5px;
     }
 
     .milestone-label {
         font-size: 5.5px;
         letter-spacing: 0px;
         line-height: 1.1;
+        margin-top: 2px;
     }
 }
 
@@ -4645,16 +4707,12 @@ button:active {
     }
 
     .boarding-stage-wrapper {
-        height: clamp(80px, 18vh, 110px);
-        overflow: visible;
+        min-height: 110px;
+        max-height: 160px;
     }
 
     .boarding-plane-box {
-        height: 100%;
-        width: auto;
-        max-width: 86%;
-        transform: scale(0.96) translateZ(0);
-        overflow: visible;
+        transform: scale(1.05) translateZ(0);
     }
 }
 
