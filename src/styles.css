@@ -2627,22 +2627,21 @@ button:active {
 /* Responsive Centered Cyberpunk Loader Modal Card */
 .boarding-loader-hud {
     position: relative;
-    width: min(94%, 600px);
-    min-height: 0;
-    max-height: 94%;
-    height: min(92%, 400px);
+    width: min(95%, 640px);
+    min-height: 380px;
+    max-height: 96%;
     background: rgba(12, 16, 28, 0.96);
     border: 1.5px solid rgba(255, 42, 75, 0.45);
-    border-radius: clamp(10px, 1.8vw, 16px);
+    border-radius: clamp(12px, 2vw, 18px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 30, 60, 0.18), inset 0 0 12px rgba(255, 30, 60, 0.08);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: clamp(4px, 0.8vh, 8px) clamp(8px, 1.6vw, 16px) clamp(6px, 1.4vh, 12px);
+    padding: clamp(6px, 1vh, 10px) clamp(10px, 1.8vw, 18px) clamp(8px, 1.8vh, 16px);
     box-sizing: border-box;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    gap: clamp(3px, 0.8vh, 6px);
+    gap: clamp(4px, 1vh, 8px);
 }
 
 /* ==========================================================================
@@ -2910,8 +2909,8 @@ button:active {
     position: relative;
     width: 100%;
     flex: 1 1 auto;
-    min-height: 90px;
-    height: auto;
+    min-height: 160px;
+    height: clamp(180px, 26vw, 240px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2923,13 +2922,11 @@ button:active {
 .boarding-plane-box {
     position: relative;
     height: 100%;
-    max-height: 100%;
-    max-width: 95%;
     aspect-ratio: 1548 / 1016;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scale(1.18) translateZ(0);
+    transform: scale(1.82) translateZ(0);
     transform-origin: center center;
     will-change: transform;
     backface-visibility: hidden;
@@ -4131,9 +4128,19 @@ button:active {
         font-size: 14.5px;
     }
 
+    .boarding-loader-hud {
+        width: min(95%, 680px);
+        min-height: 420px;
+        padding: 8px 18px 16px;
+    }
+
     .boarding-stage-wrapper {
-        min-height: 120px;
-        max-height: 320px;
+        min-height: 220px;
+        height: clamp(240px, 28vw, 320px);
+    }
+
+    .boarding-plane-box {
+        transform: scale(1.9) translateZ(0);
     }
 }
 
@@ -4181,10 +4188,24 @@ button:active {
     .bet-panel {
         padding: 3px 6px;
     }
+
+    .boarding-loader-hud {
+        width: min(94%, 600px);
+        min-height: 360px;
+    }
+
+    .boarding-stage-wrapper {
+        min-height: 150px;
+        height: clamp(170px, 22vw, 220px);
+    }
+
+    .boarding-plane-box {
+        transform: scale(1.68) translateZ(0);
+    }
 }
 
 /* 3. Tablet Portrait (641px - 900px, e.g. iPad, iPad Air/Pro) */
-@media (max-width: 900px) {
+@media (min-width: 641px) and (max-width: 900px) {
     .aviator-main-layout {
         grid-template-columns: 1fr;
     }
@@ -4251,6 +4272,20 @@ button:active {
     .bet-panel {
         height: 100%;
         padding: 3px 6px;
+    }
+
+    .boarding-loader-hud {
+        width: min(92%, 520px);
+        min-height: 320px;
+    }
+
+    .boarding-stage-wrapper {
+        min-height: 130px;
+        height: clamp(140px, 24vw, 190px);
+    }
+
+    .boarding-plane-box {
+        transform: scale(1.42) translateZ(0);
     }
 }
 
