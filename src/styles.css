@@ -129,14 +129,30 @@ button:active {
     border-bottom: 1px solid var(--border-color);
     z-index: 20;
     flex-shrink: 0;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
-.header-left,
-.header-center,
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
 .header-right {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .aviator-brand {
@@ -327,6 +343,8 @@ button:active {
     flex-shrink: 0;
     gap: 6px;
     z-index: 15;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .history-label {
@@ -334,6 +352,7 @@ button:active {
     align-items: center;
     color: var(--text-dim);
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .history-pills-scroll {
@@ -342,7 +361,9 @@ button:active {
     gap: 5px;
     overflow-x: auto;
     flex: 1;
+    min-width: 0;
     padding: 2px 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .history-pills-scroll::-webkit-scrollbar {
@@ -2114,7 +2135,7 @@ button:active {
 /* Responsive Centered Cyberpunk Loader Modal Card */
 .boarding-loader-hud {
     position: relative;
-    width: clamp(340px, 94%, 640px);
+    width: min(95%, 640px);
     max-height: 96%;
     background: rgba(11, 15, 25, 0.94);
     border: 1.5px solid rgba(255, 42, 75, 0.45);
@@ -3684,7 +3705,7 @@ button:active {
     }
 
     .header-btn-ghost .btn-label {
-        display: none;
+        display: none !important;
     }
 
     .header-btn-ghost {
@@ -3695,8 +3716,16 @@ button:active {
         justify-content: center;
     }
 
+    .header-center {
+        display: none !important;
+    }
+
+    .online-badge {
+        display: none !important;
+    }
+
     .header-btn-fair .fair-text {
-        display: none;
+        display: none !important;
     }
 
     .header-btn-fair {
@@ -3713,7 +3742,7 @@ button:active {
     }
 
     .balance-label {
-        font-size: 9px;
+        display: none !important;
     }
 
     .balance-amount {
@@ -3732,8 +3761,9 @@ button:active {
     }
 
     .header-profile-btn {
-        padding: 2px 7px 2px 2px;
-        gap: 5px;
+        padding: 2px !important;
+        border-radius: 50% !important;
+        gap: 0;
     }
 
     .header-pilot-avatar {
@@ -3743,7 +3773,7 @@ button:active {
     }
 
     .header-pilot-name {
-        font-size: 11px;
+        display: none !important;
     }
 
     /* History Bar */
@@ -3844,83 +3874,84 @@ button:active {
 
     /* Boarding Loader on Mobile */
     .boarding-loader-hud {
-        width: 95%;
-        padding: 8px 8px;
-        gap: 5px;
+        width: min(96%, 420px);
+        padding: 6px 8px;
+        gap: 4px;
         border-radius: 12px;
     }
 
     .hud-gate-badge-wrap {
-        width: clamp(135px, 36vw, 175px);
+        width: clamp(120px, 32vw, 155px);
         margin: 0;
     }
 
     .hud-passenger-pill {
-        padding: 3px 6px;
+        padding: 2px 5px;
         gap: 4px;
     }
 
     .hud-passenger-icon-circle {
-        width: 20px;
-        height: 20px;
-    }
-
-    .hud-passenger-label {
-        font-size: 7px;
-    }
-
-    .hud-passenger-count {
-        font-size: 10.5px;
-    }
-
-    .count-num {
-        font-size: 13px;
-    }
-
-    .hud-countdown-badge {
-        padding: 4px 6px;
-        gap: 5px;
-    }
-
-    .hud-rocket-box {
         width: 18px;
         height: 18px;
     }
 
-    .hud-rocket-icon {
+    .hud-passenger-label {
+        font-size: 6.5px;
+    }
+
+    .hud-passenger-count {
+        font-size: 10px;
+    }
+
+    .count-num {
+        font-size: 12px;
+    }
+
+    .hud-countdown-badge {
+        transform: translateY(0);
+        padding: 3px 6px;
+        gap: 4px;
+    }
+
+    .hud-rocket-box {
         width: 16px;
         height: 16px;
     }
 
+    .hud-rocket-icon {
+        width: 14px;
+        height: 14px;
+    }
+
     .hud-countdown-label {
-        font-size: 7px;
+        font-size: 6.5px;
     }
 
     .digit-val {
-        font-size: 16px;
+        font-size: 15px;
     }
 
     .digit-sec {
-        font-size: 10.5px;
+        font-size: 10px;
     }
 
     .hud-clock-circle {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 
     .hud-clock-icon {
-        width: 12px;
-        height: 12px;
+        width: 11px;
+        height: 11px;
     }
 
     .boarding-stage-wrapper {
-        height: clamp(180px, 42vw, 240px);
+        height: clamp(170px, 40vw, 230px);
     }
 
     .boarding-plane-box {
-        width: clamp(260px, 86vw, 360px);
-        transform: scale(1.28);
+        width: clamp(250px, 84vw, 340px);
+        transform: scale(1.22);
         transform-origin: center center;
     }
 
