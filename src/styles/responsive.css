@@ -498,7 +498,7 @@
 
     /* Smaller Badge Image & Content */
     .hud-gate-badge-wrap {
-        width: clamp(56px, 14vw, 72px) !important;
+        width: clamp(64px, 13vw, 80px) !important;
         flex-shrink: 0;
         margin: 0;
     }
@@ -509,8 +509,8 @@
     }
 
     .hud-gate-title {
-        font-size: 4.8px !important;
-        letter-spacing: 0.2px !important;
+        font-size: 4.2px !important;
+        letter-spacing: 0.15px !important;
     }
 
     /* Smaller Passenger Pill */
@@ -621,7 +621,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transform: scale(1.18) translateZ(0) !important;
+        transform: scale(1.22) translateZ(0) !important;
         transform-origin: center center;
         will-change: transform;
         overflow: visible;
@@ -978,27 +978,288 @@
         font-size: 11px;
     }
 
+    .boarding-loader-backdrop {
+        padding: 2px 4px;
+        box-sizing: border-box;
+    }
+
     .boarding-loader-hud {
-        width: min(92%, 460px) !important;
+        width: min(94%, 520px) !important;
         height: auto !important;
         min-height: 0 !important;
-        max-height: calc(100% - 6px) !important;
+        max-height: calc(100% - 4px) !important;
         border: 1.2px solid rgba(255, 42, 75, 0.45) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), 0 0 14px rgba(255, 30, 60, 0.16) !important;
-        background: rgba(12, 16, 28, 0.94) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), 0 0 12px rgba(255, 30, 60, 0.16) !important;
+        background: rgba(12, 16, 28, 0.95) !important;
         padding: 3px 8px 4px 8px !important;
-        gap: 2px;
+        gap: 1px;
+        overflow: hidden;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         margin: auto;
     }
 
+    .hud-top-row {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        flex-shrink: 0;
+    }
+
+    .hud-top-left-stack {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    /* Smaller Badge Image & Content */
+    .hud-gate-badge-wrap {
+        width: clamp(64px, 11vw, 80px) !important;
+        flex-shrink: 0;
+        margin: 0;
+    }
+
+    .hud-gate-hex-icon-box .hud-premium-jet-svg {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    .hud-gate-title {
+        font-size: 4.2px !important;
+        letter-spacing: 0.15px !important;
+    }
+
+    /* Smaller Passenger Pill */
+    .hud-passenger-pill {
+        padding: 1px 4px !important;
+        gap: 2px !important;
+        flex-shrink: 0;
+        border-radius: 4px !important;
+    }
+
+    .hud-passenger-icon-circle {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    .hud-people-icon {
+        width: 6.5px !important;
+        height: 6.5px !important;
+    }
+
+    .hud-passenger-label {
+        font-size: 4.2px !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .hud-passenger-count {
+        font-size: 7.5px !important;
+    }
+
+    .count-num {
+        font-size: 8px !important;
+    }
+
+    /* Smaller Takeoff Countdown Badge - remove desktop transform */
+    .hud-countdown-badge {
+        display: flex;
+        align-items: center;
+        gap: 2px !important;
+        padding: 1px 4px !important;
+        flex-shrink: 0;
+        margin: 0;
+        margin-left: auto;
+        transform: none !important;
+        clip-path: none !important;
+        border-radius: 4px !important;
+        border: 1px solid rgba(255, 42, 75, 0.65) !important;
+        background: rgba(28, 8, 14, 0.90) !important;
+        box-shadow: 0 0 6px rgba(255, 30, 60, 0.25) !important;
+    }
+
+    .hud-rocket-box {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    .hud-rocket-icon {
+        width: 7.5px !important;
+        height: 7.5px !important;
+    }
+
+    .hud-countdown-label {
+        font-size: 4.2px !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .digit-val {
+        font-size: 9px !important;
+    }
+
+    .digit-sec {
+        font-size: 6px !important;
+    }
+
+    .hud-clock-circle {
+        width: 9px !important;
+        height: 9px !important;
+        border-width: 1px !important;
+        margin-left: 1px !important;
+    }
+
+    .hud-clock-icon {
+        width: 5.5px !important;
+        height: 5.5px !important;
+    }
+
+    /* Center Stage: Plane scaled up to be more prominent ("plain ko thoda bada rakho") */
     .boarding-stage-wrapper {
-        height: 75px;
-        min-height: 58px;
-        max-height: 86px;
+        flex: 1 1 auto;
+        width: 100%;
+        height: 72px;
+        min-height: 56px;
+        max-height: 84px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: visible;
+        margin: 0;
     }
 
     .boarding-plane-box {
-        transform: scale(1.12) translateZ(0) !important;
+        position: relative;
+        height: 100%;
+        max-height: 100%;
+        max-width: 95%;
+        width: auto;
+        aspect-ratio: 1548 / 1016;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(1.22) translateZ(0) !important;
+        transform-origin: center center;
+        will-change: transform;
+        overflow: visible;
+    }
+
+    /* Bottom Telemetry: Compact, no cutoff ("bottom se kat rha mobile me" fixed) */
+    .hud-bottom-telemetry {
+        flex-shrink: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        margin-top: 0;
+        padding-bottom: 2px;
+    }
+
+    /* Smaller Flying Loading Bar Image */
+    .hud-loading-bar-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: clamp(140px, 28vw, 185px) !important;
+        margin-top: 5px !important;
+    }
+
+    .hud-loader-hex-icon-box {
+        left: 3.5% !important;
+        width: 11% !important;
+    }
+
+    .hud-loader-hex-icon-box .hud-premium-jet-svg {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    .hud-chevron-svg-row .chevron-arrow-svg {
+        width: 2px !important;
+        height: 3.5px !important;
+    }
+
+    .hud-telemetry-status {
+        position: absolute;
+        bottom: calc(100% + 1px) !important;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 4.8px !important;
+        letter-spacing: 0.3px !important;
+        gap: 3px;
+        white-space: nowrap;
+    }
+
+    .hud-image-percent-text {
+        right: 2% !important;
+        width: 14% !important;
+        top: 58.5% !important;
+    }
+
+    .percent-val {
+        font-size: 7.5px !important;
+    }
+
+    .percent-sec {
+        font-size: 5.5px !important;
+    }
+
+    /* 6 Milestones adjusted with smaller icons, text & track line */
+    .hud-milestone-timeline {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0 4px;
+        margin-top: 1px;
+        box-sizing: border-box;
+    }
+
+    .milestone-track-line {
+        position: absolute;
+        top: 5.5px !important;
+        left: 8px !important;
+        right: 8px !important;
+        height: 1px !important;
+    }
+
+    .milestone-badge-circle {
+        width: 11px !important;
+        height: 11px !important;
+        border-width: 1px !important;
+    }
+
+    .hud-milestone-item.active .milestone-badge-circle.active-glow {
+        width: 12px !important;
+        height: 12px !important;
+        border-width: 1.2px !important;
+    }
+
+    .milestone-svg {
+        width: 5.5px !important;
+        height: 5.5px !important;
+    }
+
+    .hud-milestone-item.active .milestone-svg {
+        width: 6.5px !important;
+        height: 6.5px !important;
+    }
+
+    .milestone-label {
+        font-size: 4.2px !important;
+        letter-spacing: 0px !important;
+        line-height: 0.95 !important;
+        margin-top: 1px !important;
     }
 }
