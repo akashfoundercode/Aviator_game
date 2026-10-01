@@ -57,8 +57,9 @@ export default function FlightArena({
   // Runway ground baseline in pixels - matches the runway tarmac strip in the background
   const runwayY = height * 0.775
   const runwayStartX = width * 0.06
-  const cruiseX = width * 0.52
-  const cruiseY = height * 0.46
+  const liftoffX = width * 0.16
+  const cruiseX = width * 0.72
+  const cruiseY = height * 0.28
 
   let planeX = runwayStartX
   let planeY = runwayY
@@ -84,27 +85,10 @@ export default function FlightArena({
   } else if (gameState === GAME_STATE.FLYING) {
     const t = flightElapsed
 
-    // Airplane Physics:
-    // 1. (0 to 0.2s): Immediate thrust surge forward
-    // 2. (0.2 to 0.4s): Nose pitches up (Vr)
-    // 3. (0.6s+): Airborne liftoff into the sky
-    let forwardRatio = 0
-    if (t < SPRINT_START) {
-      const p1 = t / SPRINT_START
-      forwardRatio = Math.pow(p1, 1.8) * 0.12
-    } else if (t < LIFTOFF_TIME) {
-      const p2 = (t - SPRINT_START) / (LIFTOFF_TIME - SPRINT_START)
-      forwardRatio = 0.12 + Math.pow(p2, 2.0) * 0.48
-    } else {
-      const p3 = Math.min(1, (t - LIFTOFF_TIME) / 1.5)
-      const easeAir = 1 - Math.pow(1 - p3, 2.0)
-      forwardRatio = 0.60 + easeAir * 0.40
-    }
-
-    planeX = runwayStartX + (cruiseX - runwayStartX) * forwardRatio
-
     if (t < SPRINT_START) {
       // Phase 1: Fast initial roll on tarmac
+      const p1 = t / SPRINT_START
+      planeX = runwayStartX + (liftoffX - runwayStartX) * Math.pow(p1, 1.8) * 0.25
       planeY = runwayY
       rotation = 0
       retract = 0
@@ -113,16 +97,18 @@ export default function FlightArena({
       isGroundRolling = true
     } else if (t < ROTATE_START) {
       // Phase 2A: Full power engine sprint
+      const speedP = (t - SPRINT_START) / (ROTATE_START - SPRINT_START)
+      planeX = runwayStartX + (liftoffX - runwayStartX) * (0.25 + Math.pow(speedP, 1.6) * 0.40)
       planeY = runwayY
       rotation = 0
       retract = 0
-      const speedP = (t - SPRINT_START) / (ROTATE_START - SPRINT_START)
       vibration = Math.sin(t * (24 + speedP * 18)) * (0.4 + speedP * 0.8)
       worldOffset = 0
       isGroundRolling = true
     } else if (t < LIFTOFF_TIME) {
-      // Phase 2B: High-speed nose rotation
+      // Phase 2B: High-speed nose rotation on tarmac
       const rotP = (t - ROTATE_START) / (LIFTOFF_TIME - ROTATE_START)
+      planeX = runwayStartX + (liftoffX - runwayStartX) * (0.65 + Math.pow(rotP, 1.4) * 0.35)
       const easeRot = rotP * rotP * (3 - 2 * rotP)
       rotation = -15.0 * easeRot
       planeY = runwayY
@@ -131,19 +117,24 @@ export default function FlightArena({
       worldOffset = 0
       isGroundRolling = true
     } else {
-      // Phase 3: Aerodynamic Liftoff & Climb into the Sky
+      // Phase 3: Aerodynamic Liftoff & Climb into Upper Sky (Clear of Center Multiplier)
       isGroundRolling = false
       const climbT = t - LIFTOFF_TIME
 
-      // Smooth aerodynamic lift climb
-      const climbP = Math.min(1, climbT / 1.8)
-      const easeY = 1 - Math.pow(1 - climbP, 2.4)
+      // Smooth aerodynamic lift climb into upper sky
+      const climbP_Y = Math.min(1, climbT / 1.1)
+      const easeY = 1 - Math.pow(1 - climbP_Y, 2.8)
       planeY = runwayY - (runwayY - cruiseY) * easeY
 
-      // Smooth Rocket Pitch Angle (-48deg upward climb)
+      // Smooth forward translation to cruiseX in upper-right quadrant
+      const climbP_X = Math.min(1, climbT / 1.6)
+      const easeX = 1 - Math.pow(1 - climbP_X, 2.0)
+      planeX = liftoffX + (cruiseX - liftoffX) * easeX
+
+      // Smooth Rocket Pitch Angle (-42deg upward climb settling towards cruise)
       const pitchP = Math.min(1, climbT / 1.0)
       const easePitch = pitchP * pitchP * (3 - 2 * pitchP)
-      const targetRocketPitch = -15.0 + (-33.0 * easePitch) // Pitches smoothly up to -48deg
+      const targetRocketPitch = -15.0 + (-27.0 * easePitch) // Pitches smoothly to -42deg
       const microRocketSway = Math.sin(climbT * 2.8) * 0.5
       rotation = targetRocketPitch + microRocketSway
 
@@ -152,7 +143,7 @@ export default function FlightArena({
       const gearDuration = 0.5
       retract = Math.min(1, Math.max(0, (climbT - gearDelay) / gearDuration))
 
-      // Aerodynamic micro-sway
+      // Aerodynamic micro-sway at cruise
       const wobbleY = Math.sin(climbT * 2.2) * 1.6
       const wobbleX = Math.cos(climbT * 1.6) * 1.0
       planeX += wobbleX
