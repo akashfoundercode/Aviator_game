@@ -164,7 +164,7 @@ export default function CircleAssetLoader({ onComplete }) {
       </div>
 
       <div className="circle-loader-info">
-        <span className="circle-loader-title">LOADING ASSETS</span>
+        <span className="circle-loader-title">LOADING...</span>
         <div className="circle-loader-track-wrap">
           <div className="circle-loader-track">
             <div
