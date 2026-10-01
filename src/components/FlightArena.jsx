@@ -57,9 +57,9 @@ export default function FlightArena({
   // Runway ground baseline in pixels - matches the runway tarmac strip in the background
   const runwayY = height * 0.775
   const runwayStartX = width * 0.06
-  const liftoffX = width * 0.16
-  const cruiseX = width * 0.72
-  const cruiseY = height * 0.28
+  const liftoffX = width * 0.18
+  const cruiseX = width * 0.67
+  const baseCruiseY = height * 0.46
 
   let planeX = runwayStartX
   let planeY = runwayY
@@ -117,41 +117,48 @@ export default function FlightArena({
       worldOffset = 0
       isGroundRolling = true
     } else {
-      // Phase 3: Aerodynamic Liftoff & Climb into Upper Sky (Clear of Center Multiplier)
+      // Phase 3: Smooth Liftoff & Continuous Progressive Climb towards the Sky
       isGroundRolling = false
       const climbT = t - LIFTOFF_TIME
 
-      // Smooth aerodynamic lift climb into upper sky
-      const climbP_Y = Math.min(1, climbT / 1.1)
-      const easeY = 1 - Math.pow(1 - climbP_Y, 2.8)
-      planeY = runwayY - (runwayY - cruiseY) * easeY
+      // 1. Initial smooth transition from runway to balanced cruise altitude
+      const climbP_Init = Math.min(1, climbT / 1.8)
+      const easeInit = 1 - Math.pow(1 - climbP_Init, 2.2)
+      const initialAltitudeY = runwayY - (runwayY - baseCruiseY) * easeInit
 
-      // Smooth forward translation to cruiseX in upper-right quadrant
-      const climbP_X = Math.min(1, climbT / 1.6)
+      // 2. Continuous steady climb upwards throughout flight ("dheere end tak halka badhte rhe upar ki taraf")
+      const maxSteadyRise = height * 0.22
+      const progressiveClimb = Math.min(
+        maxSteadyRise,
+        (Math.log(Math.max(1, multiplier)) * (height * 0.040)) + (climbT * 0.75)
+      )
+      planeY = initialAltitudeY - progressiveClimb
+
+      // Smooth horizontal translation to cruiseX (comfortably to right of center multiplier)
+      const climbP_X = Math.min(1, climbT / 1.8)
       const easeX = 1 - Math.pow(1 - climbP_X, 2.0)
       planeX = liftoffX + (cruiseX - liftoffX) * easeX
 
-      // Smooth Rocket Pitch Angle (-42deg upward climb settling towards cruise)
-      const pitchP = Math.min(1, climbT / 1.0)
-      const easePitch = pitchP * pitchP * (3 - 2 * pitchP)
-      const targetRocketPitch = -15.0 + (-27.0 * easePitch) // Pitches smoothly to -42deg
-      const microRocketSway = Math.sin(climbT * 2.8) * 0.5
-      rotation = targetRocketPitch + microRocketSway
+      // Natural progressive rocket pitch upwards
+      const pitchRatio = Math.min(1, Math.log(Math.max(1, multiplier)) / 3.0)
+      const basePitch = -13.0 + (-12.0 * pitchRatio)
+      const microRocketSway = Math.sin(climbT * 2.5) * 0.6
+      rotation = basePitch + microRocketSway
 
       // Landing Gear Retraction
       const gearDelay = 0.1
-      const gearDuration = 0.5
+      const gearDuration = 0.6
       retract = Math.min(1, Math.max(0, (climbT - gearDelay) / gearDuration))
 
       // Aerodynamic micro-sway at cruise
-      const wobbleY = Math.sin(climbT * 2.2) * 1.6
+      const wobbleY = Math.sin(climbT * 2.2) * 1.5
       const wobbleX = Math.cos(climbT * 1.6) * 1.0
       planeX += wobbleX
       planeY += wobbleY
 
       // High-speed background scrolling through celestial frames
       const milestoneScroll = climbT * 0.75 + Math.log(Math.max(1, multiplier)) * 0.65
-      worldOffset = height * (easeY * 1.0 + milestoneScroll)
+      worldOffset = height * (easeInit * 1.0 + milestoneScroll)
       vibration = 0
     }
 
