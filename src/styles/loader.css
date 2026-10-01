@@ -397,7 +397,7 @@
     }
 }
 
-/* Continuous Queue: Walking along ground, escalating on stairs shifted towards plane, hiding right at top of stairs */
+/* Continuous Queue: Walking along ground, escalating on stairs shifted towards plane interior, hiding right at cabin doorway */
 @keyframes passengerBoardPlane {
     0% {
         left: 6.9%;
@@ -424,63 +424,63 @@
         opacity: 1;
     }
     45% {
-        /* Base entry bumper */
-        left: 38.7%;
-        top: 65.5%;
+        /* Base entry step */
+        left: 36.8%;
+        top: 65.2%;
         transform: scale(0.98);
         opacity: 1;
     }
     53% {
         /* Step 1 */
-        left: 42.0%;
+        left: 40.0%;
         top: 60.0%;
         transform: scale(0.95);
         opacity: 1;
     }
     62% {
         /* Step 2 */
-        left: 45.4%;
+        left: 43.3%;
         top: 55.0%;
         transform: scale(0.92);
         opacity: 1;
     }
     71% {
         /* Step 3 */
-        left: 48.8%;
-        top: 50.5%;
+        left: 46.6%;
+        top: 50.3%;
         transform: scale(0.89);
         opacity: 1;
     }
     80% {
         /* Step 4 */
-        left: 52.1%;
-        top: 45.5%;
+        left: 49.9%;
+        top: 45.3%;
         transform: scale(0.86);
         opacity: 1;
     }
     87% {
         /* Step 5 (approaching top) */
-        left: 55.2%;
+        left: 53.0%;
         top: 40.5%;
         transform: scale(0.83);
         opacity: 1;
     }
     92% {
         /* Top of stairs threshold: fading out early */
-        left: 57.0%;
-        top: 37.2%;
+        left: 55.0%;
+        top: 37.5%;
         transform: scale(0.78);
         opacity: 0.45;
     }
     95% {
-        /* Completely hidden right at doorway */
-        left: 58.0%;
+        /* Completely hidden inside doorway */
+        left: 56.0%;
         top: 38.0%;
         transform: scale(0.65);
         opacity: 0;
     }
     100% {
-        left: 58.0%;
+        left: 56.0%;
         top: 38.0%;
         transform: scale(0.65);
         opacity: 0;
