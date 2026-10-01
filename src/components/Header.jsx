@@ -46,21 +46,12 @@ function Header({
         </button>
       </div>
 
-      {/* Center Online Count & Live Socket Status */}
+      {/* Center Online Count */}
       <div className="header-center">
         <div className="online-badge">
           <span className="online-dot" />
           <span>{onlineCount.toLocaleString()} online</span>
         </div>
-        {socketStatus && (
-          <div
-            className={`socket-badge ${socketStatus.connected ? 'connected' : 'disconnected'}`}
-            title={`Socket API: https://fctechteamnode.shop/ (Channel: ${socketStatus.channel || 'demobdg_aviator'})`}
-          >
-            <span className="socket-dot" />
-            <span>{socketStatus.connected ? (socketStatus.channel || 'demobdg_aviator') : 'Connecting...'}</span>
-          </div>
-        )}
       </div>
 
       {/* Right Controls: Balance + Sound + Fair */}
