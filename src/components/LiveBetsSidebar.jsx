@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { soundManager } from '../utils/audio'
 import { getMultiplierColor } from '../utils/crash'
+import { getFirstName } from '../utils/playerPool'
 
 function LiveBetsSidebar({
   liveBots = [],
@@ -96,7 +97,7 @@ function LiveBetsSidebar({
                     <div className="user-avatar-frame">
                       <span className="user-avatar-dot user-avatar-me">YOU</span>
                     </div>
-                    <span className="username">You (Panel {idx + 1})</span>
+                    <span className="username">You</span>
                   </div>
                   <div className="amount-col">₹{ub.amount}</div>
                   <div className="mult-col">
@@ -154,10 +155,10 @@ function LiveBetsSidebar({
                         display: bot.avatarUrl ? 'none' : 'flex',
                       }}
                     >
-                      {(bot.user || 'P').slice(0, 2).toUpperCase()}
+                      {getFirstName(bot.user || 'P').slice(0, 2).toUpperCase()}
                     </span>
                   </div>
-                  <span className="username">{bot.user}</span>
+                  <span className="username">{getFirstName(bot.user)}</span>
                 </div>
                 <div className="amount-col">₹{bot.amount}</div>
                 <div className="mult-col">
@@ -261,7 +262,7 @@ function LiveBetsSidebar({
                         #{idx + 1}
                       </span>
                     </div>
-                    <span className="username">{item.user || 'You'}</span>
+                    <span className="username">{getFirstName(item.user || 'You')}</span>
                   </div>
                   <div className="amount-col">₹{item.amount}</div>
                   <div className="mult-col">

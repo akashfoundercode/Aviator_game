@@ -1,22 +1,17 @@
 // Simulated multiplayer live bets for Aviator
-
-const USER_NAMES = [
-  'ak***78', 'vi***92', 'ro***11', 'sa***45', 'am***88', 'ra***23', 'ne***67',
-  'po***34', 'ka***90', 'mo***56', 'di***19', 'su***82', 'an***03', 'sh***41',
-  'pr***77', 'ma***65', 'vi***30', 'ku***14', 'ga***59', 'ja***81', 'ta***28',
-  'ri***99', 'yo***37', 'he***52', 'ch***63', 'de***74', 'ar***18', 'na***85'
-]
+import { RANDOM_PLAYER_NAMES, getFirstName } from './playerPool'
 
 const AVATAR_COLORS = [
   '#e50914', '#913ef8', '#34b4ff', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#14b8a6'
 ]
 
 export function generateLiveBots(roundId) {
-  const count = 18 + Math.floor(Math.random() * 12)
+  const count = 25 + Math.floor(Math.random() * 20)
   const bots = []
 
   for (let i = 0; i < count; i++) {
-    const user = USER_NAMES[i % USER_NAMES.length] + (i >= USER_NAMES.length ? `_${i}` : '')
+    const rawName = RANDOM_PLAYER_NAMES[i % RANDOM_PLAYER_NAMES.length]
+    const user = getFirstName(rawName)
     const color = AVATAR_COLORS[i % AVATAR_COLORS.length]
     const amount = [50, 100, 200, 300, 500, 1000, 2000, 5000][Math.floor(Math.random() * 8)]
 

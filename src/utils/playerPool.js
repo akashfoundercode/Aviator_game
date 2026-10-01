@@ -3,56 +3,19 @@
  */
 
 export const RANDOM_PLAYER_NAMES = [
-  'Aarav_P***',
-  'Rahul_99',
-  'Vikram_S***',
-  'Priya_R',
-  'Amit_Verma',
-  'Rohit_K***',
-  'SkyPilot_7',
-  'Suresh_D',
-  'Ananya_M***',
-  'Karan_J',
-  'Dev_Sharma',
-  'Neha_Singh',
-  'Deepak_X',
-  'Aditya_B***',
-  'Pooja_88',
-  'Manish_K',
-  'Harsh_V***',
-  'Rohan_M',
-  'Raj_Patel',
-  'Sunil_Y***',
-  'FlightKing',
-  'Aviator_Pro',
-  'Thunder_Ace',
-  'Lucky_777',
-  'Akash_R***',
-  'Gaurav_M',
-  'Sameer_L',
-  'Abhishek_P',
-  'Sachin_T***',
-  'Kavita_N',
-  'Sneha_R***',
-  'Ritu_G',
-  'Nitin_A',
-  'Sanjay_W',
-  'Vijay_R***',
-  'Kabir_92',
-  'Ishaan_K',
-  'Simran_D',
-  'Meera_S***',
-  'Varun_C',
-  'Arjun_V',
-  'Rishi_M***',
-  'Tanvi_K',
-  'Shreya_P',
-  'Yash_B***',
-  'Kunal_R',
-  'Pankaj_99',
-  'Mohit_A',
-  'Rakesh_S***',
-  'Chetan_P'
+  'Aarav', 'Rahul', 'Vikram', 'Priya', 'Amit', 'Rohit', 'Suresh', 'Ananya',
+  'Karan', 'Dev', 'Neha', 'Deepak', 'Aditya', 'Pooja', 'Manish', 'Harsh',
+  'Rohan', 'Raj', 'Sunil', 'Akash', 'Gaurav', 'Sameer', 'Abhishek', 'Sachin',
+  'Kavita', 'Sneha', 'Ritu', 'Nitin', 'Sanjay', 'Vijay', 'Kabir', 'Ishaan',
+  'Simran', 'Meera', 'Varun', 'Arjun', 'Rishi', 'Tanvi', 'Shreya', 'Yash',
+  'Kunal', 'Pankaj', 'Mohit', 'Rakesh', 'Chetan', 'Kiran', 'Divya', 'Alok',
+  'Vikas', 'Ankit', 'Ajay', 'Monika', 'Swati', 'Preeti', 'Bhavna', 'Anita',
+  'Dinesh', 'Kamal', 'Sandeep', 'Pradeep', 'Ashok', 'Vinod', 'Anil', 'Mukesh',
+  'Naresh', 'Sunita', 'Mamta', 'Lata', 'Usha', 'Geeta', 'Seema', 'Jitendra',
+  'Narendra', 'Surendra', 'Kuldeep', 'Deepa', 'Jyoti', 'Rekha', 'Poonam', 'Payal',
+  'Komal', 'Sapna', 'Shweta', 'Nisha', 'Sonali', 'Pallavi', 'Rashmi', 'Kriti',
+  'Tara', 'Maya', 'Diya', 'Rhea', 'Anvi', 'Ira', 'Myra', 'Aadhya',
+  'Ayan', 'Reyansh', 'Dhruv', 'Vihaan', 'Advait', 'Shaurya', 'Aman', 'Vicky'
 ]
 
 // Real human portrait avatar photos (men and women, high clarity)
@@ -96,6 +59,19 @@ const AVATAR_COLORS = [
 ]
 
 /**
+ * Extract clean, authentic first name from any user string
+ * Guarantees only the first name is displayed on all devices.
+ */
+export function getFirstName(fullName) {
+  if (!fullName) return 'User'
+  if (typeof fullName !== 'string') return String(fullName)
+  if (fullName.startsWith('You')) return 'You'
+  // Remove any underscores, digits, asterisks, or last names
+  const clean = fullName.split(/[_\s@]/)[0].replace(/[^a-zA-Z]/g, '')
+  return clean || fullName.slice(0, 8)
+}
+
+/**
  * Get deterministic or randomized profile (name + photo + color)
  */
 export function getPlayerProfile(seed) {
@@ -111,7 +87,8 @@ export function getPlayerProfile(seed) {
     hash = Math.floor(Math.random() * 100000)
   }
 
-  const name = RANDOM_PLAYER_NAMES[hash % RANDOM_PLAYER_NAMES.length]
+  const rawName = RANDOM_PLAYER_NAMES[hash % RANDOM_PLAYER_NAMES.length]
+  const name = getFirstName(rawName)
   const photo = RANDOM_AVATAR_PHOTOS[hash % RANDOM_AVATAR_PHOTOS.length]
   const color = AVATAR_COLORS[hash % AVATAR_COLORS.length]
 
@@ -121,7 +98,7 @@ export function getPlayerProfile(seed) {
 /**
  * Generate a dynamic batch of live players for a round
  */
-export function generateRoundPlayers(roundId = 1000, count = 35) {
+export function generateRoundPlayers(roundId = 1000, count = 55) {
   const BET_AMOUNTS = [20, 50, 100, 150, 200, 300, 500, 800, 1000, 1500, 2000, 5000]
 
   return Array.from({ length: count }).map((_, i) => {
@@ -143,7 +120,7 @@ export function generateRoundPlayers(roundId = 1000, count = 35) {
 
     return {
       id: `bot_${roundId}_${i}`,
-      user: name,
+      user: getFirstName(name),
       avatarUrl: photo,
       avatarColor: color,
       amount,

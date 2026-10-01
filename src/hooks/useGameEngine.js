@@ -87,6 +87,8 @@ export function useGameEngine() {
   adminMultiplyRef.current = adminMultiply
   const liveBotsRef = useRef(liveBots)
   liveBotsRef.current = liveBots
+  const roundPoolRef = useRef([])
+  const poolIndexRef = useRef(0)
 
   const gameStateRef = useRef(gameState)
   gameStateRef.current = gameState
@@ -109,27 +111,11 @@ export function useGameEngine() {
   const [userProfile, setUserProfile] = useState(null)
 
   // Refresh live user bet history & all bets list from API
+  // Refresh live user bet history from API
   const syncBetHistoryFromApi = useCallback(() => {
     betService.getMyBetsHistory().then((historyList) => {
       if (Array.isArray(historyList) && historyList.length > 0) {
         setMyBetsHistory(historyList)
-
-        // Map real platform bet records into the "All Bets" tab with human avatar photos and names
-        const realPlatformBets = historyList.map((item, idx) => {
-          const profile = getPlayerProfile(item.id || item.roundId || (idx + 100))
-          return {
-            id: `real_bet_${item.id || item.roundId || 'idx'}_${idx}`,
-            user: profile.name,
-            amount: item.amount,
-            cashedOut: item.cashedOut,
-            cashedAt: item.multiplier,
-            payout: item.payout,
-            avatarColor: profile.color,
-            avatarUrl: profile.photo,
-          }
-        })
-        setLiveBots(realPlatformBets)
-        liveBotsRef.current = realPlatformBets
       }
     }).catch(() => {})
   }, [])
@@ -324,11 +310,15 @@ export function useGameEngine() {
     setFlightElapsed(0)
     crashPointRef.current = null
 
-    // Fresh dynamic batch of live players with authentic names & human portrait photos
+    // Fresh dynamic pool of live players with authentic first names & human portrait photos
     const currentRound = roundIdRef.current || 1084816
-    const freshBots = generateRoundPlayers(currentRound, 38)
-    setLiveBots(freshBots)
-    liveBotsRef.current = freshBots
+    const pool = generateRoundPlayers(currentRound, 55)
+    roundPoolRef.current = pool
+    // Start countdown with initial batch of 12 bets (auto-bets / early bets)
+    const initialBots = pool.slice(0, 12)
+    poolIndexRef.current = 12
+    setLiveBots(initialBots)
+    liveBotsRef.current = initialBots
 
     // Sync round serial number & admin multiply from server
     gameService.getResultHalf().then((res) => {
@@ -339,9 +329,14 @@ export function useGameEngine() {
         } else {
           setAdminMultiply(0)
         }
-        const updatedBots = generateRoundPlayers(res.gameSr, 38)
-        setLiveBots(updatedBots)
-        liveBotsRef.current = updatedBots
+        if (res.gameSr !== currentRound) {
+          const updatedPool = generateRoundPlayers(res.gameSr, 55)
+          roundPoolRef.current = updatedPool
+          const updatedInitial = updatedPool.slice(0, 12)
+          poolIndexRef.current = 12
+          setLiveBots(updatedInitial)
+          liveBotsRef.current = updatedInitial
+        }
       }
     }).catch(() => {})
 
@@ -362,10 +357,11 @@ export function useGameEngine() {
     )
   }, [syncWalletBalance, syncBetHistoryFromApi, syncRoundHistoryPills])
 
-  // Countdown timer tick: strictly monotonic decimal countdown (never jumps back and forth)
+  // Countdown timer tick & dynamic bet streaming during betting phase
   useEffect(() => {
     if (gameState !== GAME_STATE.COUNTDOWN) return undefined
 
+    // 1. Monotonic countdown tick
     const interval = setInterval(() => {
       const now = performance.now()
       const elapsed = (now - countdownStartTsRef.current) / 1000
@@ -379,7 +375,23 @@ export function useGameEngine() {
       }
     }, 100)
 
-    return () => clearInterval(interval)
+    // 2. Stream in new bets dynamically as users place bets (every 250ms - 400ms)
+    const streamInterval = setInterval(() => {
+      const pool = roundPoolRef.current
+      const idx = poolIndexRef.current
+      if (pool && idx < pool.length) {
+        const batchSize = Math.min(pool.length - idx, Math.random() < 0.4 ? 2 : 1)
+        const incoming = pool.slice(idx, idx + batchSize)
+        poolIndexRef.current = idx + batchSize
+        setLiveBots((prev) => [...prev, ...incoming])
+        liveBotsRef.current = [...liveBotsRef.current, ...incoming]
+      }
+    }, 320)
+
+    return () => {
+      clearInterval(interval)
+      clearInterval(streamInterval)
+    }
   }, [gameState])
 
   // Local fallback FLYING loop (only runs when socket is offline)
@@ -458,6 +470,27 @@ export function useGameEngine() {
       setFlightElapsed(elapsed)
       soundManager.updateEnginePitch(liveM)
 
+      // Live bot cashouts in offline / local fallback mode
+      const currentBots = liveBotsRef.current
+      const hasNewCashout = currentBots.some(
+        (b) => !b.cashedOut && b.targetCashout <= liveM
+      )
+      if (hasNewCashout) {
+        const updatedBots = currentBots.map((b) => {
+          if (!b.cashedOut && b.targetCashout <= liveM) {
+            return {
+              ...b,
+              cashedOut: true,
+              cashedAt: b.targetCashout,
+              payout: +(b.amount * b.targetCashout).toFixed(2),
+            }
+          }
+          return b
+        })
+        liveBotsRef.current = updatedBots
+        setLiveBots(updatedBots)
+      }
+
       betsRef.current.forEach((b, i) => {
         if (b.status === BET_STATUS.ACTIVE && b.autoCashout) {
           const autoTarget = parseFloat(b.autoCashout)
@@ -531,9 +564,12 @@ export function useGameEngine() {
       if (period && period !== roundIdRef.current) {
         roundIdRef.current = period
         setRoundId(period)
-        const roundBots = generateRoundPlayers(period, 38)
-        setLiveBots(roundBots)
-        liveBotsRef.current = roundBots
+        const pool = generateRoundPlayers(period, 55)
+        roundPoolRef.current = pool
+        const initialBots = pool.slice(0, 12)
+        poolIndexRef.current = 12
+        setLiveBots(initialBots)
+        liveBotsRef.current = initialBots
       }
 
       // 2. STATUS 0: COUNTDOWN (Socket 10s Timer)

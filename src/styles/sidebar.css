@@ -51,13 +51,18 @@
 
 .bets-table-header {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1fr;
-    padding: 5px 10px;
+    grid-template-columns: 1.8fr 1fr 0.9fr 1.1fr;
+    padding: 5px 8px;
     font-size: 11px;
     color: var(--text-dim);
     font-weight: 600;
     border-bottom: 1px solid var(--border-color);
 }
+
+.bets-table-header span:nth-child(1) { text-align: left; }
+.bets-table-header span:nth-child(2) { text-align: right; padding-right: 4px; }
+.bets-table-header span:nth-child(3) { text-align: center; }
+.bets-table-header span:nth-child(4) { text-align: right; }
 
 .bets-list-scroll {
     flex: 1;
@@ -71,8 +76,8 @@
 
 .bet-row {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1fr;
-    padding: 5px 10px;
+    grid-template-columns: 1.8fr 1fr 0.9fr 1.1fr;
+    padding: 5px 8px;
     align-items: center;
     font-size: 11px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
@@ -95,13 +100,14 @@
 .user-col {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    min-width: 0;
     overflow: hidden;
 }
 
 .user-avatar-frame {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -142,21 +148,26 @@
 }
 
 .username {
-    color: var(--text-muted);
+    color: #e2e8f0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 11px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
 }
 
 .amount-col {
     font-weight: 600;
     color: var(--text-main);
+    text-align: right;
+    padding-right: 4px;
 }
 
 .mult-col {
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .mult-pill {
