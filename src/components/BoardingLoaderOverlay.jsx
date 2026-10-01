@@ -299,15 +299,15 @@ function BoardingLoaderOverlay({ countdown = 10, totalCountdown = 10 }) {
         {/* BOTTOM HUD: Official Graphic Loading Bar + 6 Progressive Milestones */}
         <div className="hud-bottom-telemetry">
 
+          {/* Telemetry Status directly above the Loading Bar */}
+          <div className="hud-telemetry-status">
+            <span className="telemetry-red">{currentStep.telemetry.red}</span>
+            <span className="telemetry-dot">•</span>
+            <span className="telemetry-white">{currentStep.telemetry.white}</span>
+          </div>
+
           {/* Futuristic Loading Bar using the Official Image Frame */}
           <div className="hud-loading-bar-wrapper">
-            {/* Telemetry Status directly above the Loading Bar */}
-            <div className="hud-telemetry-status">
-              <span className="telemetry-red">{currentStep.telemetry.red}</span>
-              <span className="telemetry-dot">•</span>
-              <span className="telemetry-white">{currentStep.telemetry.white}</span>
-            </div>
-
             <img
               src={flightLoadingBarImg}
               alt="Loading Track Frame"
