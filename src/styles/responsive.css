@@ -488,113 +488,108 @@
     }
 
     .hud-top-left-stack {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 3px;
-        flex-shrink: 1;
-        min-width: 0;
+        display: contents;
     }
 
-    /* Smaller Badge Image & Content */
+    /* Boarding Passengers Badge Image - Scaled up clearly */
     .hud-gate-badge-wrap {
-        width: clamp(64px, 13vw, 80px) !important;
+        width: clamp(86px, 22vw, 114px) !important;
         flex-shrink: 0;
-        margin: 0;
+        margin: 0 !important;
     }
 
     .hud-gate-hex-icon-box .hud-premium-jet-svg {
-        width: 9px !important;
-        height: 9px !important;
+        width: 12px !important;
+        height: 12px !important;
     }
 
     .hud-gate-title {
-        font-size: 3.1px !important;
-        letter-spacing: 0.1px !important;
+        font-size: 4.2px !important;
+        letter-spacing: 0.22px !important;
         filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9)) !important;
     }
 
-    /* Smaller Passenger Pill */
+    /* Passenger Pill Centered in Top Row */
     .hud-passenger-pill {
-        padding: 1px 3px !important;
-        gap: 2px !important;
+        padding: 2px 6px !important;
+        gap: 3px !important;
         flex-shrink: 0;
-        border-radius: 4px !important;
+        border-radius: 5px !important;
+        margin: 0 auto !important;
     }
 
     .hud-passenger-icon-circle {
-        width: 10px !important;
-        height: 10px !important;
+        width: 13px !important;
+        height: 13px !important;
     }
 
     .hud-people-icon {
-        width: 6.5px !important;
-        height: 6.5px !important;
+        width: 8px !important;
+        height: 8px !important;
     }
 
     .hud-passenger-label {
-        font-size: 3.6px !important;
-        letter-spacing: 0.2px !important;
-    }
-
-    .hud-passenger-count {
-        font-size: 6.5px !important;
-    }
-
-    .count-num {
-        font-size: 7px !important;
-    }
-
-    /* Smaller Takeoff Countdown Badge */
-    .hud-countdown-badge {
-        display: flex;
-        align-items: center;
-        gap: 2px !important;
-        padding: 1px 4px !important;
-        flex-shrink: 0;
-        margin: 0;
-        margin-left: auto;
-        transform: none !important;
-        clip-path: none !important;
-        border-radius: 4px !important;
-        border: 1px solid rgba(255, 42, 75, 0.65) !important;
-        background: rgba(28, 8, 14, 0.90) !important;
-        box-shadow: 0 0 6px rgba(255, 30, 60, 0.25) !important;
-    }
-
-    .hud-rocket-box {
-        width: 9px !important;
-        height: 9px !important;
-    }
-
-    .hud-rocket-icon {
-        width: 7.5px !important;
-        height: 7.5px !important;
-    }
-
-    .hud-countdown-label {
-        font-size: 4.2px !important;
+        font-size: 4.8px !important;
         letter-spacing: 0.3px !important;
     }
 
-    .digit-val {
+    .hud-passenger-count {
+        font-size: 8px !important;
+    }
+
+    .count-num {
         font-size: 9px !important;
     }
 
+    /* Takeoff Countdown Badge ("TAKEOFF IN") - Scaled up clearly */
+    .hud-countdown-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px !important;
+        padding: 2.5px 6px !important;
+        flex-shrink: 0;
+        margin: 0 !important;
+        transform: none !important;
+        clip-path: none !important;
+        border-radius: 5px !important;
+        border: 1.2px solid rgba(255, 42, 75, 0.75) !important;
+        background: rgba(28, 8, 14, 0.92) !important;
+        box-shadow: 0 0 8px rgba(255, 30, 60, 0.35) !important;
+    }
+
+    .hud-rocket-box {
+        width: 13px !important;
+        height: 13px !important;
+    }
+
+    .hud-rocket-icon {
+        width: 10.5px !important;
+        height: 10.5px !important;
+    }
+
+    .hud-countdown-label {
+        font-size: 5.5px !important;
+        letter-spacing: 0.4px !important;
+    }
+
+    .digit-val {
+        font-size: 11.5px !important;
+    }
+
     .digit-sec {
-        font-size: 6px !important;
+        font-size: 7.5px !important;
     }
 
     .hud-clock-circle {
-        width: 9px !important;
-        height: 9px !important;
-        border-width: 1px !important;
+        width: 13px !important;
+        height: 13px !important;
+        border-width: 1.2px !important;
         margin-left: 1px !important;
     }
 
     .hud-clock-icon {
-        width: 5.5px !important;
-        height: 5.5px !important;
+        width: 8px !important;
+        height: 8px !important;
     }
 
     /* Center Stage: Plane scaled up to be more prominent ("plain size badhao loaderka") */
@@ -1019,72 +1014,67 @@
     }
 
     .hud-top-left-stack {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
-        flex-shrink: 1;
-        min-width: 0;
+        display: contents;
     }
 
-    /* Smaller Badge Image & Content */
+    /* Boarding Passengers Badge Image - Scaled up clearly */
     .hud-gate-badge-wrap {
-        width: clamp(64px, 11vw, 80px) !important;
+        width: clamp(80px, 16vw, 102px) !important;
         flex-shrink: 0;
-        margin: 0;
+        margin: 0 !important;
     }
 
     .hud-gate-hex-icon-box .hud-premium-jet-svg {
-        width: 9px !important;
-        height: 9px !important;
+        width: 11px !important;
+        height: 11px !important;
     }
 
     .hud-gate-title {
-        font-size: 3.1px !important;
-        letter-spacing: 0.1px !important;
+        font-size: 3.8px !important;
+        letter-spacing: 0.2px !important;
         filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9)) !important;
     }
 
-    /* Smaller Passenger Pill */
+    /* Passenger Pill Centered in Top Row */
     .hud-passenger-pill {
-        padding: 1px 4px !important;
-        gap: 2px !important;
+        padding: 1.5px 5px !important;
+        gap: 3px !important;
         flex-shrink: 0;
         border-radius: 4px !important;
+        margin: 0 auto !important;
     }
 
     .hud-passenger-icon-circle {
-        width: 10px !important;
-        height: 10px !important;
+        width: 12px !important;
+        height: 12px !important;
     }
 
     .hud-people-icon {
-        width: 6.5px !important;
-        height: 6.5px !important;
+        width: 7.5px !important;
+        height: 7.5px !important;
     }
 
     .hud-passenger-label {
-        font-size: 3.6px !important;
+        font-size: 4.4px !important;
         letter-spacing: 0.2px !important;
     }
 
     .hud-passenger-count {
-        font-size: 6.5px !important;
+        font-size: 7.5px !important;
     }
 
     .count-num {
-        font-size: 7px !important;
+        font-size: 8.5px !important;
     }
 
-    /* Smaller Takeoff Countdown Badge - remove desktop transform */
+    /* Takeoff Countdown Badge ("TAKEOFF IN") - Scaled up clearly */
     .hud-countdown-badge {
         display: flex;
         align-items: center;
-        gap: 2px !important;
-        padding: 1px 4px !important;
+        gap: 3.5px !important;
+        padding: 2px 5px !important;
         flex-shrink: 0;
-        margin: 0;
-        margin-left: auto;
+        margin: 0 !important;
         transform: none !important;
         clip-path: none !important;
         border-radius: 4px !important;
@@ -1094,38 +1084,38 @@
     }
 
     .hud-rocket-box {
-        width: 9px !important;
-        height: 9px !important;
+        width: 12px !important;
+        height: 12px !important;
     }
 
     .hud-rocket-icon {
-        width: 7.5px !important;
-        height: 7.5px !important;
+        width: 9.5px !important;
+        height: 9.5px !important;
     }
 
     .hud-countdown-label {
-        font-size: 4.2px !important;
+        font-size: 5px !important;
         letter-spacing: 0.3px !important;
     }
 
     .digit-val {
-        font-size: 9px !important;
+        font-size: 10.5px !important;
     }
 
     .digit-sec {
-        font-size: 6px !important;
+        font-size: 7px !important;
     }
 
     .hud-clock-circle {
-        width: 9px !important;
-        height: 9px !important;
+        width: 12px !important;
+        height: 12px !important;
         border-width: 1px !important;
         margin-left: 1px !important;
     }
 
     .hud-clock-icon {
-        width: 5.5px !important;
-        height: 5.5px !important;
+        width: 7px !important;
+        height: 7px !important;
     }
 
     /* Center Stage: Plane scaled up to be more prominent ("plain size badhao loaderka") */

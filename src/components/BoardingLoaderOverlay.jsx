@@ -235,38 +235,36 @@ function BoardingLoaderOverlay({ countdown = 10, totalCountdown = 10 }) {
 
         {/* TOP HUD ROW */}
         <div className="hud-top-row">
-          {/* Top Left Stack: Badge + Passenger Counter */}
-          <div className="hud-top-left-stack">
-            <div className="hud-gate-badge-wrap">
-              <img
-                src={boardingBadgeImg}
-                alt="Boarding Passengers Gate A-07"
-                className="hud-gate-badge-img"
-                draggable="false"
-              />
-              <div className="hud-gate-badge-content">
-                <div className="hud-gate-hex-icon-box">
-                  <PremiumJetIcon />
-                </div>
-                <div className="hud-gate-text-col">
-                  <span className="hud-gate-title">BOARDING PASSENGERS</span>
-                </div>
+          {/* Top Left: Boarding Passengers Badge Image */}
+          <div className="hud-gate-badge-wrap">
+            <img
+              src={boardingBadgeImg}
+              alt="Boarding Passengers Gate A-07"
+              className="hud-gate-badge-img"
+              draggable="false"
+            />
+            <div className="hud-gate-badge-content">
+              <div className="hud-gate-hex-icon-box">
+                <PremiumJetIcon />
+              </div>
+              <div className="hud-gate-text-col">
+                <span className="hud-gate-title">BOARDING PASSENGERS</span>
               </div>
             </div>
+          </div>
 
-            {/* Passenger Pill */}
-            <div className="hud-passenger-pill">
-              <div className="hud-passenger-icon-circle">
-                <svg className="hud-people-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                </svg>
-              </div>
-              <div className="hud-passenger-info">
-                <span className="hud-passenger-label">PASSENGERS</span>
-                <span className="hud-passenger-count">
-                  <span className="count-num">{boardedCount}</span>/12
-                </span>
-              </div>
+          {/* Center: Passenger Counter Pill */}
+          <div className="hud-passenger-pill">
+            <div className="hud-passenger-icon-circle">
+              <svg className="hud-people-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+              </svg>
+            </div>
+            <div className="hud-passenger-info">
+              <span className="hud-passenger-label">PASSENGERS</span>
+              <span className="hud-passenger-count">
+                <span className="count-num">{boardedCount}</span>/12
+              </span>
             </div>
           </div>
 
