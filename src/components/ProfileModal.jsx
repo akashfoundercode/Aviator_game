@@ -17,6 +17,7 @@ export default function ProfileModal({ profile, balance, onRefresh, onClose }) {
   const username = profile?.username || 'Admin'
   const uid = profile?.u_id || profile?.id || 'ADMIN_123'
   const mobile = profile?.mobile || '1234567890'
+  const email = profile?.email || `${(profile?.username || 'admin').toLowerCase().replace(/[^a-z0-9]/g, '')}@skyrush.game`
   const rawImage = profile?.userimage || ''
   const userImage = rawImage && !rawImage.includes('bdgcassino.com') ? rawImage : ''
   const winningAmount = profile?.winning_amount !== undefined ? Number(profile.winning_amount) : 19605.22

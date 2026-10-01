@@ -6,6 +6,7 @@ import BetPanel from './components/BetPanel.jsx'
 import LiveBetsSidebar from './components/LiveBetsSidebar.jsx'
 import ProvablyFairModal from './components/ProvablyFairModal.jsx'
 import ProfileModal from './components/ProfileModal.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import RotateDeviceOverlay from './components/RotateDeviceOverlay.jsx'
 import CircleAssetLoader from './components/CircleAssetLoader.jsx'
 import { useGameEngine } from './hooks/useGameEngine.js'
@@ -135,12 +136,14 @@ export default function App() {
 
             {/* Pilot Profile Modal */}
             {isProfileOpen && (
-                <ProfileModal
-                    profile={game.userProfile}
-                    balance={game.balance}
-                    onRefresh={game.actions.refreshProfile}
-                    onClose={() => setIsProfileOpen(false)}
-                />
+                <ErrorBoundary fallback={null}>
+                    <ProfileModal
+                        profile={game.userProfile}
+                        balance={game.balance}
+                        onRefresh={game.actions.refreshProfile}
+                        onClose={() => setIsProfileOpen(false)}
+                    />
+                </ErrorBoundary>
             )}
 
             {/* Mobile Portrait Orientation Prompt (Strict Landscape Requirement) */}
