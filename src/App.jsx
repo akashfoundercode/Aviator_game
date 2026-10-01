@@ -7,16 +7,23 @@ import LiveBetsSidebar from './components/LiveBetsSidebar.jsx'
 import ProvablyFairModal from './components/ProvablyFairModal.jsx'
 import ProfileModal from './components/ProfileModal.jsx'
 import RotateDeviceOverlay from './components/RotateDeviceOverlay.jsx'
+import CircleAssetLoader from './components/CircleAssetLoader.jsx'
 import { useGameEngine } from './hooks/useGameEngine.js'
 
 export default function App() {
     const game = useGameEngine()
+    const [isAssetsLoaded, setIsAssetsLoaded] = useState(false)
     const [fairModalTab, setFairModalTab] = useState(null) // 'rules' | 'fairness' | null
     const [mobileTab, setMobileTab] = useState('game') // 'game' | 'bets'
     const [isProfileOpen, setIsProfileOpen] = useState(false)
 
     return (
         <div className="aviator-app-container">
+            {/* Initial Circular Asset Preloader (Preloads plane, character & all game assets) */}
+            {!isAssetsLoaded && (
+                <CircleAssetLoader onComplete={() => setIsAssetsLoaded(true)} />
+            )}
+
             {/* Top Header */}
             <Header
                 balance={game.balance}

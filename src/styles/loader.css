@@ -800,3 +800,123 @@
         opacity: 1;
     }
 }
+
+/* ==========================================================================
+   INITIAL CIRCULAR ASSET LOADER (STAGE 1 PRELOADER)
+   ========================================================================== */
+.circle-loader-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background-color: #0b0e14;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 36, 73, 0.12) 0%, #07090d 85%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    user-select: none;
+    transition: opacity 0.35s ease-out, visibility 0.35s ease-out;
+}
+
+.circle-loader-backdrop.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.circle-spinner-box {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circle-spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3.5px solid rgba(255, 255, 255, 0.08);
+    border-top: 3.5px solid #ff2449;
+    border-right: 3.5px solid #ff5577;
+    box-shadow: 0 0 20px rgba(255, 36, 73, 0.45), inset 0 0 10px rgba(255, 36, 73, 0.2);
+    animation: initial-circle-spin 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+.circle-spinner-icon {
+    width: 28px;
+    height: 28px;
+    color: #ff2449;
+    filter: drop-shadow(0 0 8px rgba(255, 36, 73, 0.85));
+    animation: circle-jet-pulse 1.6s ease-in-out infinite alternate;
+}
+
+.circle-loader-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.circle-loader-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 36, 73, 0.4);
+}
+
+.circle-loader-track-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.circle-loader-track {
+    width: 140px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.circle-loader-track-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff2449, #ff6b8b);
+    box-shadow: 0 0 8px rgba(255, 36, 73, 0.8);
+    transition: width 0.15s ease-out;
+}
+
+.circle-loader-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ff4d6d;
+    font-variant-numeric: tabular-nums;
+    min-width: 32px;
+    text-align: right;
+}
+
+@keyframes initial-circle-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes circle-jet-pulse {
+    0% {
+        transform: scale(0.92);
+        opacity: 0.85;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
